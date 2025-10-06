@@ -1,0 +1,746 @@
+/* Definición de la fuente personalizada - asegúrate de subir el archivo TTF a tu servidor */
+@font-face {
+    font-family: 'Urban Shadow';
+    src: url('fonts/urban-shadow-sans-serif.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif; /* Fuente principal para el cuerpo del texto */
+    background-color: #f8f8f8;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Estilos del menú de navegación */
+.navbar {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 1rem 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2%; /* Reducido de 5% a 2% para mantener todo más cerca */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    height: 50px;
+    width: auto; /* Mantiene la proporción original */
+}
+
+.logo-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+}
+
+.nav-menu {
+    display: flex;
+    list-style-type: none;
+    gap: 2rem;
+}
+
+.nav-item {
+    position: relative;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #222;
+    font-family: 'Urban Shadow', sans-serif; /* Fuente aplicada al menú de navegación */
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.3s ease;
+    padding: 0.5rem 0;
+}
+
+.nav-link:hover {
+    color: #666;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: 0;
+    left: 0;
+    background-color: #222;
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* Estilos para los enlaces sociales */
+.social-links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Reducido de 1rem a 0.5rem para acercar el ícono al menú */
+    margin-left: 1rem; /* Añade un pequeño margen a la izquierda para separarlo del menú */
+}
+
+.social-link {
+    color: #222;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem; /* Añade padding para mejor interacción */
+}
+
+.social-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0; /* Elimina cualquier margen extra */
+}
+
+/* Estilos para el botón de menú */
+.menu-toggle {
+    display: none;
+    cursor: pointer;
+    color: #222;
+}
+
+.menu-icon {
+    width: 28px;
+    height: 28px;
+}
+
+/* Estilos de la sección hero */
+.hero {
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/portada.jpg') center/cover;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    margin-top: 70px;
+}
+
+.hero-content h2 {
+    font-family: 'Urban Shadow', sans-serif; /* Fuente aplicada al título principal */
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: 1px;
+}
+
+.hero-content p {
+    font-family: 'Montserrat', sans-serif; /* Fuente diferente para el subtítulo */
+    font-size: 1.2rem;
+    max-width: 600px;
+    opacity: 0.9;
+}
+
+/* Estilos de la galería */
+.gallery {
+    padding: 6rem 5% 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.gallery h2 {
+    font-family: 'Urban Shadow', sans-serif; /* Fuente aplicada al título de la galería */
+    font-size: 2.2rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #222;
+}
+
+.gallery-grid {
+    position: relative;
+    width: 100%;
+}
+
+.gallery-item {
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+.gallery-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.gallery-item:hover img {
+    transform: scale(1.05);
+}
+
+/* Estilos de la página Reel */
+.reel-page {
+    padding: 6rem 5% 4rem; /* Añadido padding superior para evitar que el título esté pegado arriba */
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.reel-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.reel-header h1 {
+    font-family: 'Urban Shadow', sans-serif;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #222;
+}
+
+.reel-header p {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+.reel-description {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.reel-description h2 {
+    font-family: 'Urban Shadow', sans-serif;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #222;
+}
+
+.reel-description p {
+    font-size: 1.1rem;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Estilos de la página de contacto */
+.contact-page {
+    padding: 6rem 5% 4rem; /* Añadido padding superior para evitar que el título esté pegado arriba */
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.contact-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.contact-header h1 {
+    font-family: 'Urban Shadow', sans-serif;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #222;
+    text-transform: uppercase;
+}
+
+.contact-subtitle {
+    background-color: #000;
+    color: #fff;
+    display: inline-block;
+    padding: 0.5rem 2rem;
+    font-size: 1.2rem;
+    margin: 0 auto;
+}
+
+.contact-content {
+    display: flex;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
+
+.contact-form {
+    flex: 1;
+    min-width: 300px;
+}
+
+.contact-form p {
+    margin-bottom: 1.5rem;
+    color: #666;
+}
+
+.contact-form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.submit-btn {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Urban Shadow', sans-serif;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #333;
+}
+
+.contact-info {
+    flex: 1;
+    min-width: 300px;
+}
+
+.contact-info h3 {
+    font-family: 'Urban Shadow', sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #222;
+}
+
+.contact-info p {
+    margin-bottom: 1rem;
+    color: #666;
+}
+
+/* Estilos del footer */
+footer {
+    background-color: #222;
+    color: #fff;
+    text-align: center;
+    padding: 3rem 5%;
+    margin-top: 4rem;
+}
+
+.footer-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.footer-content h3 {
+    font-family: 'Urban Shadow', sans-serif;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: #fff;
+}
+
+.footer-content p {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.contact-details {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.contact-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.contact-item strong {
+    margin-bottom: 0.3rem;
+    color: #ddd;
+}
+
+/* Estilos responsive */
+@media (max-width: 768px) {
+    .nav-menu {
+        position: fixed;
+        left: -100%;
+        top: 70px;
+        flex-direction: column;
+        background-color: rgba(255, 255, 255, 0.98);
+        width: 100%;
+        text-align: center;
+        transition: 0.3s;
+        padding: 2rem 0;
+        box-shadow: 0 10px 27px rgba(0,0,0,0.1);
+    }
+
+    .nav-menu.active {
+        left: 0;
+    }
+
+    .nav-item {
+        margin: 1rem 0;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .hero-content h2 {
+        font-size: 2rem;
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .contact-content {
+        flex-direction: column;
+    }
+    
+    .contact-form,
+    .contact-info {
+        width: 100%;
+    }
+    
+    .contact-header h1 {
+        font-size: 2rem;
+    }
+    
+    .social-links {
+        position: absolute;
+        right: 60px;
+        top: 50%;
+        transform: translateY(-50%);
+        gap: 0.5rem; /* Mantiene el espacio reducido en móvil */
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-content h2 {
+        font-size: 1.8rem;
+    }
+
+    .gallery-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mensaje-exito {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border: 1px solid #c3e6cb;
+    text-align: center;
+}
+
+.mensaje-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+    text-align: center;
+}
+
+/* Estilos para el popup */
+.popup {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.popup-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: none;
+    border-radius: 8px;
+    width: 300px;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    animation: popupSlideIn 0.3s;
+}
+
+@keyframes popupSlideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    top: 5px;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+
+.popup-success {
+    color: #155724;
+    background-color: #d4edda;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #c3e6cb;
+    text-align: center;
+}
+
+.popup-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+    text-align: center;
+}
+
+/* Estilos para la ventana emergente de cookies */
+.cookie-consent {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #222;
+    color: white;
+    padding: 20px;
+    z-index: 10000;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+}
+
+.cookie-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.cookie-content h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.cookie-content p {
+    flex: 1;
+    margin: 0;
+    max-width: 600px;
+}
+
+.cookie-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-accept, .btn-reject, .btn-configure {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-accept {
+    background-color: #2196f3;
+    color: white;
+}
+
+.btn-reject {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-configure {
+    background-color: #757575;
+    color: white;
+}
+
+.btn-accept:hover {
+    background-color: #0d8bf2;
+}
+
+.btn-reject:hover {
+    background-color: #d32f2f;
+}
+
+.btn-configure:hover {
+    background-color: #616161;
+}
+
+/* Estilos para la configuración de cookies */
+.cookie-config {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 10001;
+    align-items: center;
+    justify-content: center;
+}
+
+.cookie-config-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.close-config {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #757575;
+}
+
+.cookie-options {
+    margin: 20px 0;
+}
+
+.cookie-option {
+    margin-bottom: 20px;
+}
+
+.cookie-option label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.cookie-option input[type="checkbox"] {
+    margin-top: 4px;
+}
+
+.cookie-option p {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 5px 0 0 28px;
+}
+
+.btn-save {
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+}
+
+.btn-save:hover {
+    background-color: #0d8bf2;
+}
+
+/* Estilos para páginas legales */
+.legal-page {
+    padding: 4rem 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+}
+
+.legal-page h1 {
+    font-family: 'Urban Shadow', sans-serif;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #222;
+    text-align: center;
+}
+
+.legal-page h2 {
+    font-family: 'Urban Shadow', sans-serif;
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem 0;
+    color: #222;
+    border-bottom: 2px solid #2196f3;
+    padding-bottom: 0.5rem;
+}
+
+.legal-page p, .legal-page ul {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+.legal-page ul {
+    padding-left: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .cookie-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .cookie-buttons {
+        justify-content: center;
+    }
+    
+    .legal-links {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+}
