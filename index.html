@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WolfFilms - Fotografía de Coches Superdeportivos</title>
+    <meta name="description" content="WolfFilms - Fotografía profesional de coches superdeportivos. Capturamos la esencia y la potencia de tu vehículo con un estilo único y profesional.">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+    .logo {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--secondary-color);
+    text-decoration: none;
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    height: 40px;
+    width: auto;
+    margin-right: 10px;
+ filter: brightness(0) invert(1);
+    transition: all 0.3s ease;
+}
+
+.logo:hover .logo-img {
+    filter: brightness(0) saturate(100%) invert(11%) sepia(100%) saturate(7426%) hue-rotate(349deg) brightness(98%) contrast(118%);
+}
+    
+        /* ========================================
+        * 🎨 PANEL DE CONTROL DE DISEÑO
+        * ¡MODIFICA SOLO ESTOS VALORES PARA CAMBIAR TODA LA WEB!
+        * ======================================== */
+        :root {
+            /* 🎨 COLORES PRINCIPALES - CAMBIA ESTOS PARA TRANSFORMAR TODA LA WEB */
+            --primary-color: #000000;        /* Color principal (fondo oscuro) */
+            --secondary-color: #ffffff;      /* Color secundario (texto claro) */
+            --accent-color: #DC143C;         /* 🔥 COLOR DE ACENTO - CAMBIA ESTE VALOR PARA CAMBIAR TODOS LOS ROJOS */
+            --accent-hover: #FF1744;         /* Color de acento al pasar mouse */
+            --background-dark: #111111;      /* Fondo más oscuro */
+            
+            /* 📝 FUENTES - CAMBIA ESTAS PARA MODIFICAR TODAS LAS TIPOGRAFÍAS */
+            --font-primary: 'Inter', sans-serif;        /* Fuente del texto normal */
+            --font-heading: 'Orbitron', sans-serif;     /* Fuente de títulos y logos */
+            
+            /* 📏 TAMAÑOS DE FUENTE - AJUSTA ESTOS VALORES */
+            --font-size-small: 0.9rem;
+            --font-size-normal: 1rem;
+            --font-size-large: 1.2rem;
+            --font-size-h3: 1.5rem;
+            --font-size-h2: 2rem;
+            --font-size-h1: 3rem;
+            --font-size-hero: clamp(3rem, 8vw, 6rem);
+            
+            /* GRADIENTES AUTOMÁTICOS - Se crean con los colores de arriba */
+            --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, #333 100%);
+            --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+            --gradient-background: linear-gradient(135deg, var(--background-dark) 0%, var(--primary-color) 100%);
+            
+            /* ESPACIADO */
+            --spacing-small: 0.5rem;
+            --spacing-normal: 1rem;
+            --spacing-large: 2rem;
+            --spacing-xl: 4rem;
+        }
+
+        /* ========================================
+        * ESTILOS BASE - NO MODIFICAR
+        * ======================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            line-height: 1.6;
+            color: var(--secondary-color);
+            background: var(--primary-color);
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: var(--spacing-normal) 0;
+            transition: all 0.3s ease;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--secondary-color);
+            text-decoration: none;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            text-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: var(--spacing-large);
+        }
+
+        .nav-links a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect fill="%23111" width="1200" height="800"/><circle cx="200" cy="200" r="100" fill="%23DC143C" opacity="0.1"/><circle cx="1000" cy="600" r="150" fill="%23FF1744" opacity="0.05"/></svg>');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 0 var(--spacing-large);
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero h1 {
+            font-family: var(--font-heading);
+            font-size: var(--font-size-hero);
+            font-weight: 900;
+            margin-bottom: var(--spacing-normal);
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(220, 20, 60, 0.3);
+        }
+
+        .hero p {
+            font-size: var(--font-size-large);
+            margin-bottom: var(--spacing-large);
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: var(--spacing-normal) 2.5rem;
+            background: var(--gradient-accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(220, 20, 60, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(220, 20, 60, 0.4);
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        /* Services Section */
+        .services {
+            padding: 6rem 0;
+            background: var(--gradient-background);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .section-title h2 {
+            font-family: var(--font-heading);
+            font-size: var(--font-size-h1);
+            font-weight: 700;
+            margin-bottom: var(--spacing-normal);
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-large);
+            margin-top: var(--spacing-xl);
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(220, 20, 60, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-accent);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(220, 20, 60, 0.2);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .service-card h3 {
+        
+        /* Estilos para precios */
+        .service-card.featured {
+            border: 2px solid var(--accent-color);
+            position: relative;
+            transform: scale(1.05);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-accent);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .price-tag {
+            text-align: center;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(220, 20, 60, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(220, 20, 60, 0.3);
+        }
+
+        .price {
+            display: block;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent-color);
+            font-family: var(--font-heading);
+            margin-bottom: 0.5rem;
+        }
+
+        .price-description {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0;
+        }
+
+        .features-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .features-list i {
+            color: var(--accent-color);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .service-card.featured {
+                transform: none;
+                margin: 1rem 0;
+            }
+        }
+        
+        
+            font-family: var(--font-heading);
+            font-size: var(--font-size-h3);
+            margin-bottom: var(--spacing-normal);
+            color: var(--secondary-color);
+        }
+
+        /* Gallery Section */
+        .gallery {
+            padding: 6rem 0;
+            background: var(--primary-color);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-normal);
+            margin-top: var(--spacing-xl);
+        }
+
+        .gallery-item {
+            aspect-ratio: 16/9;
+            background: linear-gradient(45deg, #333, #555);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(220, 20, 60, 0.3);
+        }
+
+        .gallery-item::after {
+            content: 'Ver en Instagram';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--gradient-accent);
+            color: white;
+            padding: var(--spacing-normal);
+            text-align: center;
+            font-weight: 600;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover::after {
+            transform: translateY(0);
+        }
+
+        .instagram-link {
+            text-align: center;
+            margin-top: var(--spacing-large);
+        }
+
+        .instagram-button {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-small);
+            padding: var(--spacing-normal) 2rem;
+            background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .instagram-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 6rem 0;
+            background: var(--gradient-background);
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-xl);
+            align-items: start;
+        }
+
+        .contact-info h3 {
+            font-family: var(--font-heading);
+            font-size: var(--font-size-h2);
+            margin-bottom: var(--spacing-large);
+            color: var(--accent-color);
+        }
+
+        .contact-item {
+            margin-bottom: var(--spacing-large);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-normal);
+            padding: var(--spacing-normal);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            background: rgba(220, 20, 60, 0.1);
+            transform: translateX(10px);
+        }
+
+        .contact-item i {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            min-width: 24px;
+        }
+
+        .contact-item a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-item a:hover {
+            color: var(--accent-color);
+        }
+
+        .contact-form {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(220, 20, 60, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-small);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: var(--spacing-normal);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(220, 20, 60, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: var(--font-size-normal);
+            transition: all 0.3s ease;
+            font-family: var(--font-primary);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(220, 20, 60, 0.3);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-color);
+            padding: 3rem 0 1rem;
+            text-align: center;
+            border-top: 1px solid rgba(220, 20, 60, 0.3);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-large);
+            margin-bottom: var(--spacing-large);
+        }
+
+        .social-links a {
+            color: var(--secondary-color);
+            font-size: 2rem;
+            transition: all 0.3s ease;
+            padding: var(--spacing-normal);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links a:hover {
+            color: var(--accent-color);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 10px 20px rgba(220, 20, 60, 0.3);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            .section-title h2 {
+                font-size: var(--font-size-h2);
+            }
+
+            .contact-content {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-large);
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--gradient-accent);
+            z-index: 1001;
+            transition: width 0.3s ease;
+        }
+
+        /* Loading spinner for images */
+        .gallery-item.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gallery-item.loading::before {
+            content: '';
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(220, 20, 60, 0.3);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Menu móvil */
+        .mobile-menu-btn {
+            display: none;
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="scroll-indicator"></div>
+    
+    <header>
+        <nav>
+           <a href="#" class="logo">
+        <img src="logowolf.png" alt="WolfFilms Logo" class="logo-img">
+        
+    </a>
+            
+            <ul class="nav-links">
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#servicios">Servicios</a></li>
+                <li><a href="#galeria">Galería</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <section id="inicio" class="hero">
+        <div class="hero-content">
+            <h1>WOLFFILMS</h1>
+            <p>Fotografía de Coches Superdeportivos</p>
+            <p>Capturamos la esencia y la potencia de tu vehículo con un estilo único y profesional</p>
+            <a href="#contacto" class="cta-button">Reserva tu Sesión</a>
+        </div>
+    </section>
+
+    <section id="servicios" class="services">
+        <div class="container">
+            <div class="section-title">
+                <h2>Nuestros Servicios</h2>
+                <p>Especialistas en fotografía automovilística de alta gama</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card animate-on-scroll">
+                    <div class="service-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3>Fotografía Estática</h3>
+                    <p>Sesiones profesionales que capturan cada detalle de tu vehículo con la máxima calidad y estilo.</p>
+                </div>
+                
+                
+                <div class="services-grid">
+    <div class="service-card animate-on-scroll">
+        <div class="service-icon">
+            <i class="fas fa-camera"></i>
+        </div>
+        <h3>Fotografía Estática</h3>
+        <p>Sesiones profesionales que capturan cada detalle de tu vehículo con la máxima calidad y estilo.</p>
+        <div class="price-tag">
+            <span class="price">€150</span>
+            <span class="price-description">Sesión básica</span>
+        </div>
+        <ul class="features-list">
+            <li><i class="fas fa-check"></i> 20-30 fotos editadas</li>
+            <li><i class="fas fa-check"></i> 2-3 localizaciones</li>
+            <li><i class="fas fa-check"></i> Entrega digital</li>
+        </ul>
+    </div>
+    
+    <div class="service-card animate-on-scroll featured">
+        <div class="popular-badge">MÁS POPULAR</div>
+        <div class="service-icon">
+            <i class="fas fa-video"></i>
+        </div>
+        <h3>Paquete Completo</h3>
+        <p>Fotografía + Video cinematográfico con edición profesional premium.</p>
+        <div class="price-tag">
+            <span class="price">€300</span>
+            <span class="price-description">Paquete premium</span>
+        </div>
+        <ul class="features-list">
+            <li><i class="fas fa-check"></i> 40-50 fotos editadas</li>
+            <li><i class="fas fa-check"></i> Video de 1-2 minutos</li>
+            <li><i class="fas fa-check"></i> 4-5 localizaciones</li>
+            <li><i class="fas fa-check"></i> Música personalizada</li>
+            <li><i class="fas fa-check"></i> Entrega en HD</li>
+        </ul>
+    </div>
+    
+    <div class="service-card animate-on-scroll">
+        <div class="service-icon">
+            <i class="fas fa-palette"></i>
+        </div>
+        <h3>Solo Video</h3>
+        <p>Producción de videos cinematográficos que muestran tu coche en movimiento.</p>
+        <div class="price-tag">
+            <span class="price">€200</span>
+            <span class="price-description">Video profesional</span>
+        </div>
+        <ul class="features-list">
+            <li><i class="fas fa-check"></i> Video de 1-2 minutos</li>
+            <li><i class="fas fa-check"></i> 3-4 tomas dinámicas</li>
+            <li><i class="fas fa-check"></i> Edición cinematográfica</li>
+            <li><i class="fas fa-check"></i> Música incluida</li>
+        </ul>
+    </div>
+</div>
+                
+                
+                
+                
+                <div class="service-card animate-on-scroll">
+                    <div class="service-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3>Video Dinámico</h3>
+                    <p>Producción de videos cinematográficos que muestran tu coche en movimiento con técnicas avanzadas.</p>
+                </div>
+                <div class="service-card animate-on-scroll">
+                    <div class="service-icon">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <h3>Edición Profesional</h3>
+                    <p>Post-producción de alta calidad para realzar cada imagen y video con un acabado premium.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="galeria" class="gallery">
+        <div class="container">
+            <div class="section-title">
+                <h2>Nuestro Trabajo</h2>
+                <p>Una muestra de nuestras mejores producciones</p>
+            </div>
+            <div class="gallery-grid" id="gallery-container">
+                <!-- Las imágenes se cargarán aquí dinámicamente -->
+            </div>
+            <div class="instagram-link">
+                <a href="https://www.instagram.com/wolfsanchez_/" class="instagram-button" target="_blank">
+                    <i class="fab fa-instagram"></i>
+                    Ver más en Instagram
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="contacto" class="contact">
+        <div class="container">
+            <div class="section-title">
+                <h2>Contacto</h2>
+                <p>¿Listo para tu sesión de fotos? Contáctanos</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Información de Contacto</h3>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <strong>Email:</strong><br>
+                            <a href="mailto:contacto@beige-hamster-529402.hostingersite.com">contacto@beige-hamster-529402.hostingersite.com</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <strong>Teléfono:</strong><br>
+                            <a href="tel:+34628558225">+34 628 55 82 25</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-globe"></i>
+                        <div>
+                            <strong>Web:</strong><br>
+                            <a href="https://beige-hamster-529402.hostingersite.com" target="_blank">beige-hamster-529402.hostingersite.com</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fab fa-instagram"></i>
+                        <div>
+                            <strong>Instagram:</strong><br>
+                            <a href="https://www.instagram.com/wolfsanchez_/" target="_blank">@wolfsanchez_</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form>
+                        <div class="form-group">
+                            <label for="nombre">Nombre</label>
+                            <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Teléfono</label>
+                            <input type="tel" id="telefono" name="telefono" placeholder="+34 600 000 000">
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo">Vehículo</label>
+                            <input type="text" id="vehiculo" name="vehiculo" placeholder="Marca y modelo de tu coche">
+                        </div>
+                        <div class="form-group">
+                            <label for="mensaje">Mensaje</label>
+                            <textarea id="mensaje" name="mensaje" rows="5" placeholder="Cuéntanos sobre tu proyecto..."></textarea>
+                        </div>
+                        <button type="submit" class="cta-button">Enviar Mensaje</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="social-links">
+                <a href="https://www.instagram.com/wolfsanchez_/" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="mailto:contacto@beige-hamster-529402.hostingersite.com"><i class="fas fa-envelope"></i></a>
+                <a href="tel:+34628558225"><i class="fas fa-phone"></i></a>
+            </div>
+            <p>&copy; 2024 WolfFilms. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // 📸 Sistema de carga de imágenes desde Instagram
+        // URLs de ejemplo de imágenes de coches deportivos
+        const instagramImages = [
+            'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1583121274602-3e2820c69888?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1571068316344-75bc76f77890?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1616422285623-13ff0162193c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+        ];
+
+        // Función para cargar las imágenes de la galería
+        function loadGalleryImages() {
+            const galleryContainer = document.getElementById('gallery-container');
+            
+            instagramImages.forEach((imageUrl, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item loading';
+                
+                const img = new Image();
+                img.onload = function() {
+                    galleryItem.classList.remove('loading');
+                    galleryItem.style.backgroundImage = `url('${imageUrl}')`;
+                };
+                img.onerror = function() {
+                    galleryItem.classList.remove('loading');
+                    galleryItem.style.background = 'linear-gradient(45deg, #333, #555)';
+                    galleryItem.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white;"><i class="fas fa-camera" style="font-size: 2rem; opacity: 0.5;"></i></div>';
+                };
+                img.src = imageUrl;
+                
+                // Agregar click para ir a Instagram
+                galleryItem.addEventListener('click', () => {
+                    window.open('https://www.instagram.com/wolfsanchez_/', '_blank');
+                });
+                
+                galleryContainer.appendChild(galleryItem);
+            });
+        }
+
+        // Indicador de scroll
+        function updateScrollIndicator() {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.documentElement.scrollHeight -
