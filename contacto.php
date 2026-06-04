@@ -100,14 +100,10 @@
                             </label>
                         </div>
                         
-                        <!-- Botón para verificar reCAPTCHA -->
-                        <button type="button" id="verify-recaptcha" class="btn-verify">Verificar reCAPTCHA</button>
-                        
-                        <!-- Campo oculto para reCAPTCHA -->
+                        <!-- Campo oculto para reCAPTCHA v3 (se rellena automáticamente al enviar) -->
                         <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
-                        
-                        <!-- Botón de enviar (deshabilitado hasta que se verifique reCAPTCHA) -->
-                        <button type="submit" class="submit-btn" id="submit-button" disabled>Enviar</button>
+
+                        <button type="submit" class="submit-btn" id="submit-button">Enviar</button>
                     </form>
                 </div>
                 
@@ -323,22 +319,19 @@
             }
         });
         
-        // Configurar reCAPTCHA
+        // reCAPTCHA v3: obtener token automáticamente al enviar el formulario
         grecaptcha.ready(function() {
-            // Botón para verificar reCAPTCHA
-            document.getElementById('verify-recaptcha').addEventListener('click', function() {
+            document.querySelector('.contact-form-fields').addEventListener('submit', function(e) {
+                e.preventDefault();
+                var form = this;
                 grecaptcha.execute('6Lei1N8rAAAAAG-BPtNosX1lKpAk1f5zD1dn38VE', {action: 'contact_form'})
                     .then(function(token) {
                         document.getElementById('g-recaptcha-response').value = token;
-                        // Habilitar el botón de enviar
-                        document.getElementById('submit-button').disabled = false;
-                        // Cambiar el texto del botón
-                        document.getElementById('verify-recaptcha').textContent = 'reCAPTCHA Verificado';
-                        document.getElementById('verify-recaptcha').classList.add('btn-verified');
+                        form.submit();
                     })
                     .catch(function(error) {
-                        console.error('Error al generar el token de reCAPTCHA:', error);
-                        alert('Hubo un error al verificar reCAPTCHA. Por favor, inténtalo de nuevo.');
+                        console.error('Error reCAPTCHA:', error);
+                        alert('Error al verificar reCAPTCHA. Inténtalo de nuevo.');
                     });
             });
         });

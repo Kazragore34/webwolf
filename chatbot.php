@@ -17,7 +17,12 @@
         <button id="send-message">Enviar</button>
     </div>
 </div>
-<button id="open-chatbot">💬 Chat</button>
+<button id="open-chatbot" aria-label="Abrir chat">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+</button>
 
 <style>
 /* Estilos para el chatbot flotante */
@@ -125,10 +130,17 @@
     background: #2196f3;
     color: white;
     border: none;
-    font-size: 24px;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+}
+#open-chatbot:hover {
+    background: #1976d2;
+    transform: scale(1.08);
 }
 </style>
 
