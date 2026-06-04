@@ -6,441 +6,513 @@ if (!isset($_SESSION['admin_logged']) || $_SESSION['admin_logged'] !== true) {
     exit;
 }
 
-// Generar número de presupuesto automático
+// Número automático
 $num_base = date('Ymd');
-$contador_file = 'proforma_counter.txt';
-$counter = file_exists($contador_file) ? (int)file_get_contents($contador_file) : 0;
-$numero_auto = 'WF-' . $num_base . '-' . str_pad($counter + 1, 3, '0', STR_PAD_LEFT);
+$numero_auto = 'WF-' . $num_base . '-001';
 
-// Logo SVG inline
+// Logo SVG: quitar declaración XML para incrustar inline
 $logo_svg = '';
 $logo_path = 'imagenes/logo wolf.svg';
 if (file_exists($logo_path)) {
-    $logo_svg = file_get_contents($logo_path);
+    $raw = file_get_contents($logo_path);
+    // Eliminar <?xml ...?> y limpiar
+    $logo_svg = preg_replace('/<\?xml[^?]*\?>\s*/i', '', $raw);
+    // Añadir atributos de tamaño si no los tiene
+    $logo_svg = preg_replace('/<svg /', '<svg style="width:100%;height:auto;" ', $logo_svg, 1);
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Proformas — WolfFilms</title>
-    <style>
-        /* ── Estilos del panel (no se imprimen) ── */
-        @media screen {
-            * { margin:0; padding:0; box-sizing:border-box; }
-            body { font-family:'Segoe UI',sans-serif; background:#111; color:#eee; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Proformas — WolfFilms</title>
+<style>
+/* ══════════════════════ PANEL (sólo pantalla) ══════════════════════ */
+@media screen {
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI',sans-serif;background:#111;color:#eee;}
 
-            .panel-header { background:#1a1a1a; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2a2a2a; position:sticky; top:0; z-index:100; }
-            .panel-header h1 { font-size:1rem; font-weight:600; letter-spacing:.05em; }
-            .panel-header a { color:#666; text-decoration:none; font-size:.85rem; }
-            .panel-header a:hover { color:#fff; }
+    .ph{background:#1a1a1a;padding:.8rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2a2a;position:sticky;top:0;z-index:200;}
+    .ph h1{font-size:.95rem;font-weight:600;letter-spacing:.05em;}
+    .ph a{color:#666;text-decoration:none;font-size:.82rem;}
+    .ph a:hover{color:#fff;}
 
-            .layout { display:grid; grid-template-columns:420px 1fr; gap:0; height:calc(100vh - 56px); overflow:hidden; }
+    .layout{display:grid;grid-template-columns:400px 1fr;height:calc(100vh - 48px);overflow:hidden;}
 
-            /* Formulario izquierda */
-            .form-panel { background:#1a1a1a; border-right:1px solid #2a2a2a; overflow-y:auto; padding:1.5rem; }
-            .form-panel h2 { font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:#666; margin-bottom:1rem; padding-bottom:.5rem; border-bottom:1px solid #2a2a2a; }
-            .form-panel h2:not(:first-child) { margin-top:1.5rem; }
+    /* ── Formulario ── */
+    .fp{background:#1a1a1a;border-right:1px solid #2a2a2a;overflow-y:auto;padding:1.2rem;}
+    .fp h2{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#555;margin:1.2rem 0 .6rem;padding-bottom:.4rem;border-bottom:1px solid #222;}
+    .fp h2:first-child{margin-top:0;}
+    .fld{margin-bottom:.65rem;}
+    .fld label{display:block;font-size:.72rem;color:#777;margin-bottom:.25rem;}
+    .fld input,.fld textarea,.fld select{width:100%;padding:.55rem .75rem;background:#111;border:1px solid #252525;border-radius:6px;color:#ddd;font-size:.82rem;font-family:inherit;transition:border-color .2s;}
+    .fld input:focus,.fld textarea:focus{outline:none;border-color:#555;}
+    .fld textarea{resize:vertical;min-height:65px;}
 
-            .field { margin-bottom:.8rem; }
-            .field label { display:block; font-size:.75rem; color:#888; margin-bottom:.3rem; letter-spacing:.05em; }
-            .field input, .field textarea, .field select {
-                width:100%; padding:.6rem .8rem; background:#111; border:1px solid #2a2a2a;
-                border-radius:6px; color:#eee; font-size:.85rem; font-family:inherit;
-                transition:border-color .2s;
-            }
-            .field input:focus, .field textarea:focus { outline:none; border-color:#555; }
-            .field textarea { resize:vertical; min-height:70px; }
+    .row-grid{display:grid;grid-template-columns:1fr 95px 26px;gap:.35rem;align-items:center;margin-bottom:.35rem;}
+    .row-grid input{padding:.45rem .55rem;background:#111;border:1px solid #252525;border-radius:5px;color:#ddd;font-size:.78rem;width:100%;}
+    .row-grid input:focus{outline:none;border-color:#555;}
+    .del-btn{background:none;border:1px solid #2a2a2a;border-radius:5px;color:#555;cursor:pointer;width:26px;height:26px;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .del-btn:hover{border-color:#e74c3c;color:#e74c3c;}
+    .add-row-btn{background:none;border:1px dashed #2a2a2a;border-radius:6px;width:100%;padding:.45rem;color:#555;font-size:.78rem;cursor:pointer;margin-top:.2rem;}
+    .add-row-btn:hover{border-color:#555;color:#999;}
 
-            /* Filas de conceptos */
-            .concepto-row { display:grid; grid-template-columns:1fr 100px 28px; gap:.4rem; align-items:center; margin-bottom:.4rem; }
-            .concepto-row input { padding:.5rem .6rem; background:#111; border:1px solid #2a2a2a; border-radius:5px; color:#eee; font-size:.82rem; width:100%; }
-            .concepto-row input:focus { outline:none; border-color:#555; }
-            .btn-del-row { background:none; border:1px solid #333; border-radius:5px; color:#666; cursor:pointer; width:28px; height:28px; font-size:1rem; display:flex; align-items:center; justify-content:center; }
-            .btn-del-row:hover { background:#2a2a2a; color:#e74c3c; }
-            #add-row { background:none; border:1px dashed #333; border-radius:6px; width:100%; padding:.5rem; color:#666; font-size:.8rem; cursor:pointer; margin-top:.3rem; }
-            #add-row:hover { border-color:#666; color:#aaa; }
+    /* Selector de diseño */
+    .design-sel{display:flex;gap:.5rem;margin-bottom:1rem;}
+    .ds-btn{flex:1;padding:.55rem;border:1px solid #2a2a2a;border-radius:7px;background:none;color:#666;font-size:.78rem;cursor:pointer;transition:all .2s;}
+    .ds-btn.active{border-color:#fff;color:#fff;background:#222;}
+    .ds-btn:hover:not(.active){border-color:#555;color:#aaa;}
 
-            .btn-print { background:#fff; color:#111; border:none; padding:.85rem 2rem; border-radius:8px; font-weight:700; font-size:.95rem; cursor:pointer; width:100%; margin-top:1.5rem; }
-            .btn-print:hover { background:#ddd; }
+    .print-btn{background:#fff;color:#111;border:none;padding:.8rem;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;width:100%;margin-top:1.2rem;}
+    .print-btn:hover{background:#ddd;}
+    .hint{text-align:center;font-size:.72rem;color:#444;margin-top:.4rem;}
 
-            /* Preview derecha */
-            .preview-panel { background:#e8e8e8; overflow-y:auto; display:flex; align-items:flex-start; justify-content:center; padding:2rem; }
-        }
+    /* ── Preview ── */
+    .pp{background:#888;overflow-y:auto;display:flex;justify-content:center;padding:1.5rem;}
+}
 
-        /* ── Documento (se ve en preview Y se imprime) ── */
-        .proforma-doc {
-            background:#fff;
-            width:210mm;
-            min-height:297mm;
-            padding:16mm 18mm;
-            font-family:'Helvetica Neue', Arial, sans-serif;
-            color:#1a1a1a;
-            box-shadow:0 4px 30px rgba(0,0,0,.25);
-        }
+/* ══════════════════════ DISEÑO 1 — Fiel al PDF ══════════════════════ */
+.d1{
+    width:210mm;min-height:297mm;
+    background:#b8d4e3; /* fondo azul claro como el PDF */
+    padding:14mm 16mm;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#111;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 4px 30px rgba(0,0,0,.4);
+}
 
-        .doc-header { display:flex; flex-direction:column; align-items:center; margin-bottom:10mm; }
-        .doc-logo { width:60mm; height:auto; }
-        .doc-logo svg { width:100%; height:auto; }
-        .doc-titulo {
-            font-size:16pt;
-            font-weight:900;
-            text-transform:uppercase;
-            letter-spacing:.08em;
-            margin-top:6mm;
-            text-align:center;
-        }
+/* Marca de agua */
+.d1-wm{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%) rotate(-15deg);
+    width:180mm;
+    opacity:.06;
+    pointer-events:none;
+    z-index:0;
+}
+.d1-wm svg{width:100%;height:auto;}
 
-        .doc-meta { display:flex; justify-content:space-between; margin-bottom:7mm; font-size:8pt; color:#555; }
-        .doc-meta span { }
+.d1>*:not(.d1-wm){position:relative;z-index:1;}
 
-        .doc-cliente { background:#f5f5f5; border-left:3px solid #111; padding:4mm 5mm; margin-bottom:7mm; font-size:9pt; }
-        .doc-cliente strong { display:block; font-size:10pt; margin-bottom:1mm; }
+.d1-logo{display:flex;justify-content:center;margin-bottom:8mm;}
+.d1-logo .logo-wrap{width:65mm;}
+.d1-logo .logo-wrap svg{width:100%;height:auto;}
 
-        .doc-detalles { margin-bottom:7mm; }
-        .doc-detalles p { font-size:9pt; margin-bottom:1.5mm; line-height:1.4; }
-        .doc-detalles strong { font-weight:700; }
+.d1-title{
+    text-align:center;
+    font-size:18pt;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    margin-bottom:8mm;
+    line-height:1.1;
+}
 
-        .doc-table { width:100%; border-collapse:collapse; margin-bottom:5mm; }
-        .doc-table th { background:#111; color:#fff; padding:3mm 4mm; font-size:9pt; text-align:left; }
-        .doc-table th:last-child { text-align:right; width:32mm; }
-        .doc-table td { padding:2.5mm 4mm; font-size:9pt; border-bottom:1px solid #eee; }
-        .doc-table td:last-child { text-align:right; font-weight:600; }
-        .doc-table tr.total-row td { background:#f5f5f5; font-weight:800; font-size:10pt; border-top:2px solid #111; }
-        .doc-table tr.iva-row td { font-size:8pt; color:#777; border-bottom:none; }
-        .doc-table tr.grandtotal-row td { background:#111; color:#fff; font-weight:800; font-size:10.5pt; }
+.d1-meta{display:flex;justify-content:space-between;margin-bottom:6mm;font-size:8pt;color:#333;}
 
-        .doc-opcionales { margin-top:5mm; }
-        .doc-opcionales h4 { font-size:9.5pt; font-weight:800; margin-bottom:2mm; }
-        .doc-opcionales p { font-size:8.5pt; color:#444; line-height:1.6; white-space:pre-line; }
+.d1-cliente{background:rgba(255,255,255,.45);border-left:3px solid #1a1a1a;padding:3mm 4mm;margin-bottom:5mm;font-size:8.5pt;}
+.d1-cliente strong{display:block;font-size:9.5pt;font-weight:800;margin-bottom:.5mm;}
 
-        .doc-notas { margin-top:5mm; padding:3mm 4mm; border:1px solid #ddd; border-radius:2mm; }
-        .doc-notas h4 { font-size:8.5pt; font-weight:700; margin-bottom:1.5mm; color:#555; }
-        .doc-notas p { font-size:8pt; color:#666; white-space:pre-line; line-height:1.5; }
+.d1-detalles{margin-bottom:7mm;}
+.d1-detalles p{font-size:9pt;margin-bottom:1.5mm;line-height:1.4;}
+.d1-detalles strong{font-weight:700;}
 
-        .doc-footer { margin-top:10mm; padding-top:4mm; border-top:1px solid #ddd; display:flex; justify-content:space-between; font-size:7.5pt; color:#888; }
+.d1-table{width:100%;border-collapse:collapse;margin-bottom:6mm;background:#fff;}
+.d1-table th{background:#111;color:#fff;padding:2.5mm 4mm;font-size:9pt;font-weight:700;text-align:left;}
+.d1-table th:last-child{text-align:right;width:28mm;}
+.d1-table td{padding:2mm 4mm;font-size:8.5pt;border-bottom:1px solid #ddd;background:#fff;}
+.d1-table td:last-child{text-align:right;font-weight:600;}
+.d1-table tr.iva-r td{font-size:7.5pt;color:#666;border-bottom:none;background:#f5f5f5;}
+.d1-table tr.sub-r td{background:#f5f5f5;font-weight:700;}
+.d1-table tr.tot-r td{background:#111;color:#fff;font-weight:900;font-size:10pt;border:none;}
 
-        .doc-validez { margin-top:4mm; font-size:8pt; color:#888; text-align:center; }
+.d1-opts{margin-bottom:5mm;}
+.d1-opts strong{display:block;font-size:9.5pt;font-weight:800;margin-bottom:1.5mm;}
+.d1-opts p{font-size:8.5pt;line-height:1.7;white-space:pre-line;}
 
-        /* ── Print ── */
-        @media print {
-            body { background:#fff !important; }
-            .panel-header, .form-panel { display:none !important; }
-            .layout { display:block !important; height:auto !important; }
-            .preview-panel { background:#fff !important; padding:0 !important; }
-            .proforma-doc { box-shadow:none !important; width:100% !important; padding:10mm 12mm !important; }
-        }
-    </style>
+.d1-notas{background:rgba(255,255,255,.4);padding:3mm 4mm;border-radius:1mm;margin-bottom:4mm;}
+.d1-notas strong{display:block;font-size:8pt;font-weight:700;margin-bottom:1mm;color:#444;}
+.d1-notas p{font-size:7.5pt;color:#555;line-height:1.5;white-space:pre-line;}
+
+.d1-validez{text-align:center;font-size:7.5pt;color:#555;margin-bottom:5mm;}
+
+.d1-footer{border-top:1px solid rgba(0,0,0,.2);padding-top:3mm;display:flex;justify-content:space-between;font-size:7pt;color:#555;}
+
+/* ══════════════════════ DISEÑO 2 — Alternativo ══════════════════════ */
+.d2{
+    width:210mm;min-height:297mm;
+    background:#fff;
+    padding:14mm 16mm;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    color:#1a1a1a;
+    box-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+
+.d2-header{background:#111;margin:-14mm -16mm 10mm;padding:10mm 16mm;display:flex;align-items:center;justify-content:space-between;}
+.d2-header .logo-wrap{width:55mm;}
+.d2-header .logo-wrap svg{width:100%;height:auto;filter:invert(1);}
+.d2-header-right{text-align:right;color:#ccc;}
+.d2-header-right .d2-num{font-size:9pt;letter-spacing:.08em;color:#888;text-transform:uppercase;}
+.d2-header-right .d2-titulo{font-size:12pt;font-weight:800;color:#fff;margin-top:1mm;}
+.d2-header-right .d2-fecha{font-size:8pt;color:#777;margin-top:1mm;}
+
+.d2-cliente{border:1px solid #eee;border-radius:2mm;padding:4mm 5mm;margin-bottom:6mm;font-size:9pt;}
+.d2-cliente strong{display:block;font-size:10pt;font-weight:800;margin-bottom:.5mm;}
+.d2-cliente span{color:#666;font-size:8pt;}
+
+.d2-detalles{display:grid;grid-template-columns:1fr 1fr;gap:2mm;margin-bottom:7mm;}
+.d2-det-item{background:#f8f8f8;padding:2.5mm 4mm;border-radius:1.5mm;}
+.d2-det-item .lbl{font-size:7pt;text-transform:uppercase;letter-spacing:.08em;color:#999;margin-bottom:.5mm;}
+.d2-det-item .val{font-size:8.5pt;font-weight:600;color:#111;}
+
+.d2-table{width:100%;border-collapse:collapse;margin-bottom:5mm;}
+.d2-table th{background:#111;color:#fff;padding:2.5mm 4mm;font-size:8.5pt;font-weight:700;text-align:left;}
+.d2-table th:last-child{text-align:right;width:28mm;}
+.d2-table td{padding:2mm 4mm;font-size:8.5pt;border-bottom:1px solid #f0f0f0;}
+.d2-table td:last-child{text-align:right;font-weight:600;}
+.d2-table tr.iva-r td{font-size:7.5pt;color:#888;border-bottom:none;}
+.d2-table tr.sub-r td{background:#f8f8f8;font-weight:700;}
+.d2-table tr.tot-r td{background:#111;color:#fff;font-weight:900;font-size:10.5pt;border:none;}
+
+.d2-opts{margin-top:5mm;border-top:1px solid #eee;padding-top:4mm;}
+.d2-opts strong{display:block;font-size:8.5pt;font-weight:800;margin-bottom:1.5mm;color:#333;text-transform:uppercase;letter-spacing:.06em;}
+.d2-opts p{font-size:8pt;color:#666;line-height:1.7;white-space:pre-line;}
+
+.d2-notas{margin-top:4mm;border:1px solid #eee;border-radius:2mm;padding:3mm 4mm;}
+.d2-notas strong{display:block;font-size:7.5pt;font-weight:700;color:#999;text-transform:uppercase;margin-bottom:1mm;}
+.d2-notas p{font-size:8pt;color:#666;white-space:pre-line;line-height:1.5;}
+
+.d2-validez{text-align:center;font-size:7.5pt;color:#aaa;margin:4mm 0;}
+
+.d2-footer{border-top:1px solid #eee;padding-top:3mm;display:flex;justify-content:space-between;font-size:7pt;color:#aaa;}
+
+/* ══════════════════════ PRINT ══════════════════════ */
+@media print{
+    body{background:#fff!important;}
+    .ph,.fp{display:none!important;}
+    .layout{display:block!important;height:auto!important;}
+    .pp{background:#fff!important;padding:0!important;display:block!important;}
+    .d1,.d2{box-shadow:none!important;width:100%!important;}
+    [data-design="1"] .d2,[data-design="2"] .d1{display:none!important;}
+}
+</style>
 </head>
 <body>
 
-<div class="panel-header">
+<div class="ph">
     <h1>📄 Generador de Proformas — WolfFilms</h1>
-    <a href="admin-upload.php">← Volver al panel</a>
+    <a href="admin-upload.php">← Panel principal</a>
 </div>
 
 <div class="layout">
 
-    <!-- ════ FORMULARIO ════ -->
-    <div class="form-panel">
+<!-- ══════════ FORMULARIO ══════════ -->
+<div class="fp">
 
-        <h2>Número y fecha</h2>
-        <div class="field">
-            <label>Número de presupuesto</label>
-            <input type="text" id="f-numero" value="<?= htmlspecialchars($numero_auto) ?>">
-        </div>
-        <div class="field">
-            <label>Fecha</label>
-            <input type="date" id="f-fecha" value="<?= date('Y-m-d') ?>">
-        </div>
-        <div class="field">
-            <label>Validez del presupuesto</label>
-            <input type="text" id="f-validez" value="30 días" placeholder="Ej: 30 días">
-        </div>
-
-        <h2>Título del documento</h2>
-        <div class="field">
-            <input type="text" id="f-titulo" value="PRESUPUESTO SESIÓN FOTOGRÁFICA" placeholder="PRESUPUESTO SESIÓN FOTOGRÁFICA">
-        </div>
-
-        <h2>Datos del cliente</h2>
-        <div class="field">
-            <label>Nombre completo</label>
-            <input type="text" id="f-cliente-nombre" placeholder="Ej: María García López">
-        </div>
-        <div class="field">
-            <label>Email</label>
-            <input type="email" id="f-cliente-email" placeholder="cliente@email.com">
-        </div>
-        <div class="field">
-            <label>Teléfono</label>
-            <input type="text" id="f-cliente-tel" placeholder="+34 600 000 000">
-        </div>
-
-        <h2>Detalles de la sesión</h2>
-        <div class="field">
-            <label>Duración estimada</label>
-            <input type="text" id="f-duracion" value="4-5 horas" placeholder="Ej: 4-5 horas">
-        </div>
-        <div class="field">
-            <label>Ubicación</label>
-            <input type="text" id="f-ubicacion" value="Espacio proporcionado por el cliente" placeholder="Ej: Aranjuez o según acuerdo">
-        </div>
-        <div class="field">
-            <label>Tipo de fotografía</label>
-            <input type="text" id="f-tipo" value="Retrato cosmético" placeholder="Ej: Retrato, Boda, Evento...">
-        </div>
-        <div class="field">
-            <label>Entrega</label>
-            <input type="text" id="f-entrega" value="20-30 fotografías editadas levemente en alta resolución" placeholder="Ej: 20-30 fotos en alta resolución">
-        </div>
-
-        <h2>Conceptos y precios</h2>
-        <div style="display:grid;grid-template-columns:1fr 100px 28px;gap:.4rem;margin-bottom:.4rem;">
-            <span style="font-size:.72rem;color:#666">Concepto</span>
-            <span style="font-size:.72rem;color:#666">Precio</span>
-            <span></span>
-        </div>
-        <div id="conceptos-list">
-            <!-- filas generadas por JS -->
-        </div>
-        <button id="add-row" onclick="addRow()">+ Añadir concepto</button>
-
-        <h2>IVA</h2>
-        <div class="field" style="display:flex;gap:.5rem;align-items:center">
-            <input type="number" id="f-iva" value="21" min="0" max="100" style="width:70px">
-            <label style="margin:0;color:#888;font-size:.85rem">% — escribe 0 para mostrar solo subtotal</label>
-        </div>
-
-        <h2>Opcionales</h2>
-        <div class="field">
-            <textarea id="f-opcionales" placeholder="Versión con mayor retoque de piel o edición avanzada +10 €/foto
-Fotografía adicional fuera del lote (más de 30 fotos) +10 €/foto
-Entrega exprés en 48h +50 €">Versión con mayor retoque de piel o edición avanzada +10 €/foto
-Fotografía adicional fuera del lote (más de 30 fotos) +10 €/foto
-Entrega exprés en 48h +50 €</textarea>
-        </div>
-
-        <h2>Notas adicionales</h2>
-        <div class="field">
-            <textarea id="f-notas" placeholder="Formas de pago, condiciones, etc."></textarea>
-        </div>
-
-        <button class="btn-print" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
-        <p style="text-align:center;font-size:.75rem;color:#555;margin-top:.6rem">Ctrl+P → «Guardar como PDF»</p>
+    <h2>Diseño</h2>
+    <div class="design-sel">
+        <button class="ds-btn active" onclick="setDesign(1,this)">📋 Diseño 1 — PDF original</button>
+        <button class="ds-btn"        onclick="setDesign(2,this)">✨ Diseño 2 — Alternativo</button>
     </div>
 
-    <!-- ════ PREVIEW ════ -->
-    <div class="preview-panel">
-        <div class="proforma-doc" id="proforma-preview">
+    <h2>Nº y Fecha</h2>
+    <div class="fld"><label>Número de presupuesto</label><input type="text" id="f-num" value="<?= htmlspecialchars($numero_auto) ?>"></div>
+    <div class="fld"><label>Fecha</label><input type="date" id="f-fecha" value="<?= date('Y-m-d') ?>"></div>
+    <div class="fld"><label>Validez</label><input type="text" id="f-validez" value="30 días"></div>
 
-            <div class="doc-header">
-                <div class="doc-logo">
-                    <?= $logo_svg ?>
-                </div>
-                <div class="doc-titulo" id="p-titulo">PRESUPUESTO SESIÓN FOTOGRÁFICA</div>
-            </div>
+    <h2>Título</h2>
+    <div class="fld"><input type="text" id="f-titulo" value="PRESUPUESTO SESIÓN FOTOGRÁFICA"></div>
 
-            <div class="doc-meta">
-                <span>Nº <strong id="p-numero"><?= htmlspecialchars($numero_auto) ?></strong></span>
-                <span>Fecha: <strong id="p-fecha"><?= date('d/m/Y') ?></strong></span>
-            </div>
+    <h2>Cliente</h2>
+    <div class="fld"><label>Nombre</label><input type="text" id="f-cnombre" placeholder="Ej: María García López"></div>
+    <div class="fld"><label>Email</label><input type="email" id="f-cemail" placeholder="cliente@email.com"></div>
+    <div class="fld"><label>Teléfono</label><input type="text" id="f-ctel" placeholder="+34 600 000 000"></div>
 
-            <div class="doc-cliente" id="p-cliente-box" style="display:none">
-                <strong id="p-cliente-nombre"></strong>
-                <span id="p-cliente-contacto"></span>
-            </div>
+    <h2>Detalles de la sesión</h2>
+    <div class="fld"><label>Duración estimada</label><input type="text" id="f-dur" value="4-5 horas"></div>
+    <div class="fld"><label>Ubicación</label><input type="text" id="f-ubi" value="Espacio proporcionado por el cliente"></div>
+    <div class="fld"><label>Tipo de fotografía</label><input type="text" id="f-tipo" value="Retrato cosmético"></div>
+    <div class="fld"><label>Entrega</label><input type="text" id="f-ent" value="20-30 fotografías editadas levemente en alta resolución"></div>
 
-            <div class="doc-detalles" id="p-detalles">
-                <p><strong>Duración estimada:</strong> <span id="p-duracion">4-5 horas</span></p>
-                <p><strong>Ubicación:</strong> <span id="p-ubicacion">Espacio proporcionado por el cliente</span></p>
-                <p><strong>Tipo de fotografía:</strong> <span id="p-tipo">Retrato cosmético</span></p>
-                <p><strong>Entrega:</strong> <span id="p-entrega">20-30 fotografías editadas levemente en alta resolución</span></p>
-            </div>
+    <h2>Conceptos</h2>
+    <div style="display:grid;grid-template-columns:1fr 95px 26px;gap:.35rem;margin-bottom:.3rem;">
+        <span style="font-size:.68rem;color:#444">Concepto</span>
+        <span style="font-size:.68rem;color:#444">Precio</span>
+        <span></span>
+    </div>
+    <div id="rows-list"></div>
+    <button class="add-row-btn" onclick="addRow()">+ Añadir línea</button>
 
-            <table class="doc-table">
-                <thead>
-                    <tr><th>Concepto</th><th>Precio (€)</th></tr>
-                </thead>
-                <tbody id="p-table-body">
-                    <!-- filas generadas por JS -->
-                </tbody>
-                <tfoot id="p-table-foot">
-                    <!-- totales generados por JS -->
-                </tfoot>
-            </table>
-
-            <div class="doc-opcionales" id="p-opcionales-box" style="display:none">
-                <h4>Opcionales:</h4>
-                <p id="p-opcionales"></p>
-            </div>
-
-            <div class="doc-notas" id="p-notas-box" style="display:none">
-                <h4>Notas</h4>
-                <p id="p-notas"></p>
-            </div>
-
-            <div class="doc-validez" id="p-validez">Presupuesto válido durante 30 días</div>
-
-            <div class="doc-footer">
-                <span>WolfFilms — Ángel Fragoso Sánchez</span>
-                <span>angelsanchez@wolffilms.es · +34 628 55 82 25</span>
-                <span>wolffilms.es</span>
-            </div>
-        </div>
+    <h2>IVA</h2>
+    <div class="fld" style="display:flex;gap:.5rem;align-items:center;">
+        <input type="number" id="f-iva" value="21" min="0" max="100" style="width:65px">
+        <span style="font-size:.78rem;color:#666">% (0 = sólo total sin IVA)</span>
     </div>
 
+    <h2>Opcionales</h2>
+    <div class="fld"><textarea id="f-opts">Versión con mayor retoque de piel o edición avanzada +10 €/foto
+Fotografía adicional fuera del lote (más de 30 fotos) +10 €/foto
+Entrega exprés en 48h +50 €</textarea></div>
+
+    <h2>Notas adicionales</h2>
+    <div class="fld"><textarea id="f-notas" placeholder="Formas de pago, condiciones, etc."></textarea></div>
+
+    <button class="print-btn" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
+    <p class="hint">En el diálogo de impresión → «Guardar como PDF»</p>
 </div>
 
+<!-- ══════════ PREVIEW ══════════ -->
+<div class="pp" id="pp" data-design="1">
+
+    <!-- ─── DISEÑO 1 ─── -->
+    <div class="d1" id="doc1">
+        <!-- Marca de agua -->
+        <div class="d1-wm"><?= $logo_svg ?></div>
+
+        <!-- Logo -->
+        <div class="d1-logo">
+            <div class="logo-wrap"><?= $logo_svg ?></div>
+        </div>
+
+        <div class="d1-title" id="p1-titulo">PRESUPUESTO SESIÓN FOTOGRÁFICA</div>
+
+        <div class="d1-meta">
+            <span>Nº <strong id="p1-num"><?= htmlspecialchars($numero_auto) ?></strong></span>
+            <span>Fecha: <strong id="p1-fecha"><?= date('d/m/Y') ?></strong></span>
+        </div>
+
+        <div class="d1-cliente" id="p1-cliente" style="display:none">
+            <strong id="p1-cnombre"></strong>
+            <span id="p1-ccontacto"></span>
+        </div>
+
+        <div class="d1-detalles">
+            <p><strong>Duración estimada:</strong> <span id="p1-dur">4-5 horas</span></p>
+            <p><strong>Ubicación:</strong> <span id="p1-ubi">Espacio proporcionado por el cliente</span></p>
+            <p><strong>Tipo de fotografía:</strong> <span id="p1-tipo">Retrato cosmético</span></p>
+            <p><strong>Entrega:</strong> <span id="p1-ent">20-30 fotografías editadas levemente en alta resolución</span></p>
+        </div>
+
+        <table class="d1-table">
+            <thead><tr><th>Concepto</th><th>Precio (€)</th></tr></thead>
+            <tbody id="p1-tbody"></tbody>
+            <tfoot id="p1-tfoot"></tfoot>
+        </table>
+
+        <div class="d1-opts" id="p1-opts-box" style="display:none">
+            <strong>Opcionales:</strong>
+            <p id="p1-opts"></p>
+        </div>
+
+        <div class="d1-notas" id="p1-notas-box" style="display:none">
+            <strong>Notas</strong>
+            <p id="p1-notas"></p>
+        </div>
+
+        <div class="d1-validez" id="p1-validez">Presupuesto válido durante 30 días</div>
+
+        <div class="d1-footer">
+            <span>WolfFilms — Ángel Fragoso Sánchez</span>
+            <span>angelsanchez@wolffilms.es · +34 628 55 82 25</span>
+            <span>wolffilms.es</span>
+        </div>
+    </div>
+
+    <!-- ─── DISEÑO 2 ─── -->
+    <div class="d2" id="doc2" style="display:none">
+        <div class="d2-header">
+            <div class="logo-wrap"><?= $logo_svg ?></div>
+            <div class="d2-header-right">
+                <div class="d2-num">Presupuesto <span id="p2-num"><?= htmlspecialchars($numero_auto) ?></span></div>
+                <div class="d2-titulo" id="p2-titulo">PRESUPUESTO SESIÓN FOTOGRÁFICA</div>
+                <div class="d2-fecha" id="p2-fecha"><?= date('d/m/Y') ?></div>
+            </div>
+        </div>
+
+        <div class="d2-cliente" id="p2-cliente" style="display:none">
+            <strong id="p2-cnombre"></strong>
+            <span id="p2-ccontacto"></span>
+        </div>
+
+        <div class="d2-detalles" id="p2-detalles">
+            <div class="d2-det-item"><div class="lbl">Duración</div><div class="val" id="p2-dur">4-5 horas</div></div>
+            <div class="d2-det-item"><div class="lbl">Tipo</div><div class="val" id="p2-tipo">Retrato cosmético</div></div>
+            <div class="d2-det-item"><div class="lbl">Ubicación</div><div class="val" id="p2-ubi">Espacio del cliente</div></div>
+            <div class="d2-det-item"><div class="lbl">Entrega</div><div class="val" id="p2-ent">20-30 fotografías</div></div>
+        </div>
+
+        <table class="d2-table">
+            <thead><tr><th>Concepto</th><th>Precio (€)</th></tr></thead>
+            <tbody id="p2-tbody"></tbody>
+            <tfoot id="p2-tfoot"></tfoot>
+        </table>
+
+        <div class="d2-opts" id="p2-opts-box" style="display:none">
+            <strong>Opcionales</strong>
+            <p id="p2-opts"></p>
+        </div>
+
+        <div class="d2-notas" id="p2-notas-box" style="display:none">
+            <strong>Notas</strong>
+            <p id="p2-notas"></p>
+        </div>
+
+        <div class="d2-validez" id="p2-validez">Presupuesto válido durante 30 días</div>
+
+        <div class="d2-footer">
+            <span>WolfFilms — Ángel Fragoso Sánchez</span>
+            <span>angelsanchez@wolffilms.es · +34 628 55 82 25</span>
+            <span>wolffilms.es</span>
+        </div>
+    </div>
+
+</div><!-- /pp -->
+</div><!-- /layout -->
+
 <script>
-// ── Datos iniciales por defecto ──────────────────────────────────────────────
-const defaultRows = [
-    { concepto: 'Horarios de sesión',                    precio: '250' },
-    { concepto: 'Edición leve (color, detalle de piel)', precio: '100' },
-    { concepto: 'Desplazamiento / montaje de equipo',    precio: 'Incluido' },
-    { concepto: 'Entrega digital',                       precio: 'Incluido' },
-    { concepto: 'Derechos de uso comercial',             precio: '75' },
+// ── Filas por defecto ─────────────────────────────────────────────────────────
+const DEFAULT_ROWS = [
+    ['Horarios de sesión',                     '250'],
+    ['Edición leve (color, detalle de piel)',   '100'],
+    ['Desplazamiento / montaje de equipo',      'Incluido'],
+    ['Entrega digital',                         'Incluido'],
+    ['Derechos de uso comercial',               '75'],
 ];
 
-// ── Inicializar filas ─────────────────────────────────────────────────────────
-function addRow(concepto = '', precio = '') {
-    const list = document.getElementById('conceptos-list');
-    const idx = list.children.length;
-    const div = document.createElement('div');
-    div.className = 'concepto-row';
-    div.innerHTML = `
-        <input type="text" placeholder="Concepto" value="${escHtml(concepto)}"
-               oninput="updatePreview()" onchange="updatePreview()">
-        <input type="text" placeholder="Precio o Incluido" value="${escHtml(precio)}"
-               oninput="updatePreview()" onchange="updatePreview()">
-        <button class="btn-del-row" onclick="this.parentElement.remove();updatePreview()">×</button>
-    `;
-    list.appendChild(div);
-    updatePreview();
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function fmt(n){ return parseFloat(n).toFixed(2).replace('.',',') + ' €'; }
+
+function addRow(c='', p=''){
+    const list = document.getElementById('rows-list');
+    const d = document.createElement('div');
+    d.className = 'row-grid';
+    d.innerHTML = `<input type="text" placeholder="Concepto" value="${esc(c)}">
+                   <input type="text" placeholder="Precio/Incluido" value="${esc(p)}">
+                   <button class="del-btn" onclick="this.parentElement.remove();upd()">×</button>`;
+    list.appendChild(d);
+    upd();
+}
+DEFAULT_ROWS.forEach(r => addRow(r[0], r[1]));
+
+// ── Diseño activo ─────────────────────────────────────────────────────────────
+let activeDesign = 1;
+function setDesign(n, btn){
+    activeDesign = n;
+    document.querySelectorAll('.ds-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('doc1').style.display = n===1 ? '' : 'none';
+    document.getElementById('doc2').style.display = n===2 ? '' : 'none';
+    document.getElementById('pp').dataset.design = n;
 }
 
-function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-
-defaultRows.forEach(r => addRow(r.concepto, r.precio));
-
-// ── Actualizar preview en tiempo real ─────────────────────────────────────────
-function fmt(n) {
-    if (isNaN(n) || n === '') return '—';
-    return parseFloat(n).toFixed(2).replace('.', ',') + ' €';
-}
-
-function updatePreview() {
-    // Campos simples
-    const bind = [
-        ['f-titulo',    'p-titulo',    v => v || 'PRESUPUESTO'],
-        ['f-numero',    'p-numero',    v => v],
-        ['f-duracion',  'p-duracion',  v => v],
-        ['f-ubicacion', 'p-ubicacion', v => v],
-        ['f-tipo',      'p-tipo',      v => v],
-        ['f-entrega',   'p-entrega',   v => v],
-    ];
-    bind.forEach(([fid, pid, fn]) => {
-        const el = document.getElementById(pid);
-        if (el) el.textContent = fn(document.getElementById(fid)?.value || '');
-    });
+// ── Actualizar preview ────────────────────────────────────────────────────────
+function upd(){
+    const v = id => document.getElementById(id)?.value ?? '';
+    const set = (id, txt) => { const el=document.getElementById(id); if(el) el.textContent=txt; };
 
     // Fecha formateada
-    const fechaVal = document.getElementById('f-fecha')?.value;
-    if (fechaVal) {
-        const [y,m,d] = fechaVal.split('-');
-        document.getElementById('p-fecha').textContent = `${d}/${m}/${y}`;
-    }
+    const fd = v('f-fecha');
+    const fmtDate = fd ? fd.split('-').reverse().join('/') : '';
+
+    // ── Diseño 1
+    set('p1-titulo',  v('f-titulo')||'PRESUPUESTO');
+    set('p1-num',     v('f-num'));
+    set('p1-fecha',   fmtDate);
+    set('p1-dur',     v('f-dur'));
+    set('p1-ubi',     v('f-ubi'));
+    set('p1-tipo',    v('f-tipo'));
+    set('p1-ent',     v('f-ent'));
+
+    // ── Diseño 2
+    set('p2-titulo',  v('f-titulo')||'PRESUPUESTO');
+    set('p2-num',     v('f-num'));
+    set('p2-fecha',   fmtDate);
+    set('p2-dur',     v('f-dur'));
+    set('p2-ubi',     v('f-ubi'));
+    set('p2-tipo',    v('f-tipo'));
+    set('p2-ent',     v('f-ent'));
 
     // Validez
-    const validez = document.getElementById('f-validez')?.value;
-    document.getElementById('p-validez').textContent =
-        validez ? `Presupuesto válido durante ${validez}` : '';
+    const val = v('f-validez');
+    set('p1-validez', val ? `Presupuesto válido durante ${val}` : '');
+    set('p2-validez', val ? `Presupuesto válido durante ${val}` : '');
 
     // Cliente
-    const nombre = document.getElementById('f-cliente-nombre')?.value.trim();
-    const email  = document.getElementById('f-cliente-email')?.value.trim();
-    const tel    = document.getElementById('f-cliente-tel')?.value.trim();
-    const clienteBox = document.getElementById('p-cliente-box');
-    if (nombre || email || tel) {
-        clienteBox.style.display = '';
-        document.getElementById('p-cliente-nombre').textContent = nombre || '';
-        let contacto = [email, tel].filter(Boolean).join(' · ');
-        document.getElementById('p-cliente-contacto').textContent = contacto;
-    } else {
-        clienteBox.style.display = 'none';
-    }
-
-    // Conceptos
-    const rows = document.querySelectorAll('#conceptos-list .concepto-row');
-    const tbody = document.getElementById('p-table-body');
-    const tfoot = document.getElementById('p-table-foot');
-    tbody.innerHTML = '';
-    let subtotal = 0;
-
-    rows.forEach(row => {
-        const inputs = row.querySelectorAll('input');
-        const concepto = inputs[0].value.trim();
-        const precioRaw = inputs[1].value.trim();
-        if (!concepto) return;
-
-        const isNum = !isNaN(parseFloat(precioRaw)) && precioRaw !== '';
-        if (isNum) subtotal += parseFloat(precioRaw);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${escHtml(concepto)}</td><td>${isNum ? fmt(precioRaw) : escHtml(precioRaw || '—')}</td>`;
-        tbody.appendChild(tr);
+    const cn = v('f-cnombre').trim();
+    const ce = v('f-cemail').trim();
+    const ct = v('f-ctel').trim();
+    const cc = [ce, ct].filter(Boolean).join(' · ');
+    ['p1','p2'].forEach(p=>{
+        const box = document.getElementById(p+'-cliente');
+        if(!box) return;
+        if(cn||ce||ct){
+            box.style.display='';
+            set(p+'-cnombre', cn);
+            set(p+'-ccontacto', cc);
+        } else { box.style.display='none'; }
     });
 
-    // Totales
-    const ivaPct = parseFloat(document.getElementById('f-iva')?.value) || 0;
-    const ivaAmount = subtotal * (ivaPct / 100);
-    const total = subtotal + ivaAmount;
+    // Conceptos
+    const rows = document.querySelectorAll('.row-grid');
+    let sub = 0;
+    let tbodyHTML = '';
+    rows.forEach(r=>{
+        const ins = r.querySelectorAll('input');
+        const c = ins[0].value.trim();
+        const p = ins[1].value.trim();
+        if(!c) return;
+        const isN = p !== '' && !isNaN(parseFloat(p));
+        if(isN) sub += parseFloat(p);
+        tbodyHTML += `<tr><td>${esc(c)}</td><td>${isN ? fmt(p) : esc(p||'—')}</td></tr>`;
+    });
 
-    tfoot.innerHTML = '';
-    if (ivaPct > 0) {
-        tfoot.innerHTML = `
-            <tr class="total-row"><td>Subtotal</td><td>${fmt(subtotal)}</td></tr>
-            <tr class="iva-row"><td>IVA (${ivaPct}%)</td><td>${fmt(ivaAmount)}</td></tr>
-            <tr class="grandtotal-row"><td>TOTAL</td><td>${fmt(total)}</td></tr>
-        `;
+    const iva = parseFloat(v('f-iva'))||0;
+    const ivaAmt = sub*(iva/100);
+    const total = sub+ivaAmt;
+    let tfootHTML = '';
+    if(iva>0){
+        tfootHTML = `<tr class="sub-r"><td>Subtotal</td><td>${fmt(sub)}</td></tr>
+                     <tr class="iva-r"><td>IVA (${iva}%)</td><td>${fmt(ivaAmt)}</td></tr>
+                     <tr class="tot-r"><td>TOTAL</td><td>${fmt(total)}</td></tr>`;
     } else {
-        tfoot.innerHTML = `
-            <tr class="grandtotal-row"><td>Total estimado</td><td>${fmt(subtotal)}</td></tr>
-        `;
+        tfootHTML = `<tr class="tot-r"><td>Total estimado</td><td>${fmt(sub)} +IVA</td></tr>`;
     }
+
+    ['p1','p2'].forEach(p=>{
+        const tb = document.getElementById(p+'-tbody');
+        const tf = document.getElementById(p+'-tfoot');
+        if(tb) tb.innerHTML = tbodyHTML;
+        if(tf) tf.innerHTML = tfootHTML;
+    });
 
     // Opcionales
-    const opcs = document.getElementById('f-opcionales')?.value.trim();
-    const opcsBox = document.getElementById('p-opcionales-box');
-    if (opcs) {
-        opcsBox.style.display = '';
-        document.getElementById('p-opcionales').textContent = opcs;
-    } else {
-        opcsBox.style.display = 'none';
-    }
+    const opts = v('f-opts').trim();
+    ['p1','p2'].forEach(p=>{
+        const box = document.getElementById(p+'-opts-box');
+        const el  = document.getElementById(p+'-opts');
+        if(!box||!el) return;
+        box.style.display = opts ? '' : 'none';
+        el.textContent = opts;
+    });
 
     // Notas
-    const notas = document.getElementById('f-notas')?.value.trim();
-    const notasBox = document.getElementById('p-notas-box');
-    if (notas) {
-        notasBox.style.display = '';
-        document.getElementById('p-notas').textContent = notas;
-    } else {
-        notasBox.style.display = 'none';
-    }
+    const notas = v('f-notas').trim();
+    ['p1','p2'].forEach(p=>{
+        const box = document.getElementById(p+'-notas-box');
+        const el  = document.getElementById(p+'-notas');
+        if(!box||!el) return;
+        box.style.display = notas ? '' : 'none';
+        el.textContent = notas;
+    });
 }
 
-// ── Escuchar todos los inputs ─────────────────────────────────────────────────
-document.querySelectorAll('#\\31 a1a1a input, #\\31 a1a1a textarea, .form-panel input, .form-panel textarea, .form-panel select')
-    .forEach(el => el.addEventListener('input', updatePreview));
-
-// Escucha delegada en el panel
-document.querySelector('.form-panel').addEventListener('input', updatePreview);
-
-// Render inicial
-updatePreview();
+// ── Escuchar cambios ─────────────────────────────────────────────────────────
+document.querySelector('.fp').addEventListener('input', upd);
+upd();
 </script>
-
 </body>
 </html>
