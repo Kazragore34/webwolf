@@ -3,7 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portafolio de Fotografía</title>
+    <title>WolfFilms — Fotografía y Vídeo Profesional Madrid | Ángel Sánchez</title>
+    <meta name="description" content="Fotógrafo y videógrafo profesional en Madrid. Bodas, eventos, retratos y fotografía artística. Disponible en toda Europa. Contacta con WolfFilms.">
+    <meta name="keywords" content="fotógrafo Madrid, videógrafo Madrid, fotografía profesional, portfolio fotografía, WolfFilms, Ángel Sánchez fotógrafo">
+    <meta name="author" content="Ángel Fragoso Sánchez — WolfFilms">
+    <link rel="canonical" href="https://wolffilms.es/">
+
+    <!-- Open Graph / redes sociales -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://wolffilms.es/">
+    <meta property="og:title" content="WolfFilms — Fotografía y Vídeo Profesional Madrid">
+    <meta property="og:description" content="Fotógrafo y videógrafo profesional en Madrid. Bodas, eventos, retratos y fotografía artística. Disponible en toda Europa.">
+    <meta property="og:image" content="https://wolffilms.es/portada.jpg">
+    <meta property="og:locale" content="es_ES">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="WolfFilms — Fotografía y Vídeo Profesional Madrid">
+    <meta name="twitter:description" content="Fotógrafo y videógrafo profesional en Madrid. Bodas, eventos y fotografía artística.">
+    <meta name="twitter:image" content="https://wolffilms.es/portada.jpg">
+
+    <!-- JSON-LD: datos estructurados para Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "WolfFilms",
+      "description": "Fotografía y vídeo profesional en Madrid",
+      "url": "https://wolffilms.es",
+      "telephone": "+34628558225",
+      "email": "angelsanchez@wolffilms.es",
+      "image": "https://wolffilms.es/portada.jpg",
+      "logo": "https://wolffilms.es/logowolf.png",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Madrid",
+        "addressCountry": "ES"
+      },
+      "sameAs": [
+        "https://www.instagram.com/wolfsanchez_/"
+      ],
+      "priceRange": "€€",
+      "openingHours": "Mo-Su 09:00-20:00"
+    }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">

@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin-upload.php
+Disallow: /wp-admin/
+Disallow: /wp-login.php
+Disallow: /procesar_contacto.php
+Disallow: /chatbot.php
+Disallow: /webhook2.php
+Disallow: /webhook3.php
+Disallow: /videos.json
+
+Sitemap: https://wolffilms.es/sitemap.xml
