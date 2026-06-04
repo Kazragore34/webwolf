@@ -8,6 +8,8 @@
     <meta name="keywords" content="fotógrafo Aranjuez, videógrafo Aranjuez, fotógrafo Madrid, fotografía profesional Aranjuez, bodas Aranjuez, WolfFilms, Ángel Sánchez fotógrafo">
     <meta name="author" content="Ángel Fragoso Sánchez — WolfFilms">
     <link rel="canonical" href="https://wolffilms.es/">
+    <!-- Google Search Console verification -->
+    <meta name="google-site-verification" content="l8uW_HTfOstJmAmY74UEpjbYGcIRy_3j790zPcZMkUo">
 
     <!-- Open Graph / redes sociales -->
     <meta property="og:type" content="website">
@@ -110,27 +112,30 @@
                 <?php
                 $directorio = 'imagenes/';
                 $imagenes = array();
-                
+                $alt_texts = file_exists('imagenes.json')
+                    ? (json_decode(file_get_contents('imagenes.json'), true) ?: [])
+                    : [];
+
                 if (is_dir($directorio)) {
                     if ($gestor = opendir($directorio)) {
                         while (($archivo = readdir($gestor)) !== false) {
-                            if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $archivo)) {
-                                $imagenes[] = $directorio . $archivo;
+                            if (preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $archivo)) {
+                                $imagenes[] = $archivo;
                             }
                         }
                         closedir($gestor);
-                        
-                        foreach ($imagenes as $imagen) {
-                            $size = getimagesize($imagen);
+
+                        foreach ($imagenes as $archivo) {
+                            $ruta = $directorio . $archivo;
+                            $size = getimagesize($ruta);
                             $orientation = ($size[0] > $size[1]) ? 'landscape' : 'portrait';
-                            
+                            $alt = htmlspecialchars($alt_texts[$archivo] ?? 'Fotografía profesional WolfFilms — Ángel Sánchez, Aranjuez');
+
                             echo '<div class="gallery-item ' . $orientation . '">';
-                            echo '<img src="' . htmlspecialchars($imagen) . '" alt="Imagen de portafolio">';
+                            echo '<img src="' . htmlspecialchars($ruta) . '" alt="' . $alt . '" loading="lazy">';
                             echo '</div>';
                         }
                     }
-                } else {
-                    echo '<p>La carpeta de imágenes no existe.</p>';
                 }
                 ?>
             </div>

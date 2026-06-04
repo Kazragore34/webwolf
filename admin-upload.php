@@ -25,7 +25,39 @@ if (isset($_GET['logout'])) {
 // ─── Acciones protegidas ──────────────────────────────────────────────────────
 if (isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true) {
 
-    $VIDEOS_JSON = 'videos.json';
+    $VIDEOS_JSON  = 'videos.json';
+    $IMAGENES_JSON = 'imagenes.json';
+
+    function leerAltTexts($path) {
+        if (!file_exists($path)) return [];
+        $d = json_decode(file_get_contents($path), true);
+        return is_array($d) ? $d : [];
+    }
+    function guardarAltTexts($path, $data) {
+        file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    }
+
+    // Guardar alt texts editados
+    if (isset($_POST['save_alts'])) {
+        $alts = leerAltTexts($IMAGENES_JSON);
+        foreach ($_POST['alt'] ?? [] as $filename => $texto) {
+            $filename = basename($filename);
+            if (preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $filename)) {
+                $alts[$filename] = trim($texto);
+            }
+        }
+        guardarAltTexts($IMAGENES_JSON, $alts);
+        $mensaje = 'Descripciones guardadas correctamente.'; $tipo_mensaje = 'exito';
+    }
+
+    // Limpiar alt text de imagen eliminada
+    if (isset($_GET['delete_img'])) {
+        $f = basename($_GET['delete_img']);
+        $alts = leerAltTexts($IMAGENES_JSON);
+        unset($alts[$f]);
+        guardarAltTexts($IMAGENES_JSON, $alts);
+    }
+
     function leerVideos($path) {
         if (!file_exists($path)) return [];
         $v = json_decode(file_get_contents($path), true);
@@ -119,6 +151,7 @@ if (isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true) {
             if (preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $f)) $imagenes_existentes[] = $f;
         }
     }
+    $alt_texts   = leerAltTexts($IMAGENES_JSON);
     $videos_lista = leerVideos($VIDEOS_JSON);
 }
 ?>
@@ -264,19 +297,33 @@ if (isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true) {
         </form>
 
         <?php if (!empty($imagenes_existentes)): ?>
-        <p class="section-label" style="margin-top:2rem">Galería actual</p>
+        <p class="section-label" style="margin-top:2rem">
+            Galería actual — escribe una descripción para cada foto (ayuda al SEO)
+        </p>
+        <form method="POST">
         <div class="gallery-admin">
             <?php foreach ($imagenes_existentes as $img): ?>
             <div class="g-item">
                 <img src="imagenes/<?= htmlspecialchars($img) ?>" alt="">
-                <div class="g-footer">
-                    <span><?= htmlspecialchars($img) ?></span>
-                    <a href="?delete_img=<?= urlencode($img) ?>" class="btn-del"
-                       onclick="return confirm('¿Eliminar esta imagen?')">✕</a>
+                <div class="g-footer" style="flex-direction:column; align-items:stretch; gap:.4rem; padding:.6rem .7rem;">
+                    <input type="text"
+                           name="alt[<?= htmlspecialchars($img) ?>]"
+                           value="<?= htmlspecialchars($alt_texts[$img] ?? '') ?>"
+                           placeholder="Ej: Boda en Aranjuez, retrato corporativo..."
+                           style="width:100%;padding:.35rem .5rem;background:#222;border:1px solid #333;border-radius:5px;color:#ddd;font-size:.75rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:.68rem;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px"><?= htmlspecialchars($img) ?></span>
+                        <a href="?delete_img=<?= urlencode($img) ?>" class="btn-del"
+                           onclick="return confirm('¿Eliminar esta imagen?')">✕</a>
+                    </div>
                 </div>
             </div>
             <?php endforeach; ?>
         </div>
+        <div style="text-align:center;margin-top:1.2rem">
+            <button type="submit" name="save_alts" class="btn-submit">💾 Guardar descripciones</button>
+        </div>
+        </form>
         <?php else: ?>
             <div class="empty">No hay imágenes aún. Sube la primera arriba.</div>
         <?php endif; ?>
