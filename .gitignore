@@ -1,0 +1,5 @@
+log.txt
+*.log
+wp-config.php
+imagenes/*
+!imagenes/.gitkeep
