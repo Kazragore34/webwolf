@@ -20,11 +20,27 @@ function guardarJSON($p,$d) { file_put_contents($p,json_encode($d,JSON_PRETTY_PR
 function ytId($url) { preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/',$url,$m); return $m[1]??null; }
 
 // ── Logo SVG ──────────────────────────────────────
-$logo_svg = '';
+// Función que devuelve el SVG con un prefijo de ID único para evitar
+// duplicados cuando se incrusta varias veces en la misma página.
+$logo_svg_raw = '';
 $logo_path = 'imagenes/logo wolf.svg';
 if (file_exists($logo_path)) {
     $raw = file_get_contents($logo_path);
-    $logo_svg = preg_replace('/<\?xml[^?]*\?>\s*/i', '', $raw);
+    // Quitar declaración XML
+    $raw = preg_replace('/<\?xml[^?]*\?>\s*/i', '', $raw);
+    // Asegurar fill negro explícito en paths (por si hereda color incorrecto)
+    $raw = str_replace('<path ', '<path fill="#111111" ', $raw);
+    $logo_svg_raw = $raw;
+}
+$_logo_counter = 0;
+function logo_svg() {
+    global $logo_svg_raw, $_logo_counter;
+    if (!$logo_svg_raw) return '<div style="height:40px"></div>';
+    $_logo_counter++;
+    $prefix = 'wflogo'.$_logo_counter;
+    // Reemplazar IDs para evitar duplicados
+    $svg = preg_replace('/\bid="([^"]+)"/', 'id="'.$prefix.'_$1"', $logo_svg_raw);
+    return $svg;
 }
 
 // ── Acciones (sólo si autenticado) ───────────────
@@ -308,7 +324,7 @@ body{font-family:'Segoe UI',sans-serif;background:#111;color:#eee;min-height:100
 <!-- ═══════════ LOGIN ═══════════ -->
 <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
     <div style="background:#161616;border:1px solid #1e1e1e;border-radius:12px;padding:2.5rem;width:360px;text-align:center;">
-        <div style="width:120px;margin:0 auto 1.5rem;"><?= $logo_svg ?></div>
+        <div style="width:120px;margin:0 auto 1.5rem;"><?= logo_svg() ?></div>
         <h2 style="margin-bottom:1.5rem;font-size:1.2rem;font-weight:600;">Acceso al panel</h2>
         <?php if($msg):?><div class="alert <?=$msg_tipo?>"><?=htmlspecialchars($msg)?></div><?php endif;?>
         <form method="POST">
@@ -324,7 +340,7 @@ body{font-family:'Segoe UI',sans-serif;background:#111;color:#eee;min-height:100
 
 <div class="topbar">
     <div class="brand">
-        <div style="width:100px;"><?= $logo_svg ?></div>
+        <div style="width:100px;"><?= logo_svg() ?></div>
         <span style="color:#333;font-size:.78rem;margin-left:.4rem;">Admin</span>
     </div>
     <a href="?logout=1" class="logout">Cerrar sesión</a>
@@ -517,8 +533,8 @@ Entrega exprés en 48h +50 €</textarea></div>
 
             <!-- D1: blanco + watermark -->
             <div class="doc d1" id="doc1">
-                <div class="wm"><?= $logo_svg ?></div>
-                <div class="d1-logo"><div class="lw"><?= $logo_svg ?></div></div>
+                <div class="wm"><?= logo_svg() ?></div>
+                <div class="d1-logo"><div class="lw"><?= logo_svg() ?></div></div>
                 <div class="d1-tit" id="p1t">PRESUPUESTO SESIÓN FOTOGRÁFICA</div>
                 <div class="d1-meta">
                     <span>Nº <strong id="p1n"><?=htmlspecialchars($num_auto)?></strong></span>
@@ -542,7 +558,7 @@ Entrega exprés en 48h +50 €</textarea></div>
             <!-- D2: oscuro -->
             <div class="doc d2" id="doc2" style="display:none">
                 <div class="d2-head">
-                    <div class="lw"><?= $logo_svg ?></div>
+                    <div class="lw"><?= logo_svg() ?></div>
                     <div class="d2-hr">
                         <div class="num">Presupuesto <span id="p2n"><?=htmlspecialchars($num_auto)?></span></div>
                         <div class="tit" id="p2t">PRESUPUESTO SESIÓN FOTOGRÁFICA</div>

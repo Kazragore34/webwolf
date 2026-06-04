@@ -3,5 +3,6 @@ log.txt
 wp-config.php
 imagenes/*
 !imagenes/.gitkeep
+!imagenes/*.svg
 videos/*
 !videos/.gitkeep
