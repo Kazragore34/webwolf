@@ -123,17 +123,21 @@
                 </div>
             </div>
             
-            <!-- Información de protección de datos (movida aquí, debajo del formulario) -->
-            <div class="protection-info">
-                <h3>INFORMACIÓN PROTECCIÓN DE DATOS:</h3>
-                <p>Los datos de carácter personal que nos facilite a través de los formularios de esta web serán tratados conforme a lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril, General de Protección de Datos (RGPD), y la Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD).</p>
-                <p>Responsable del tratamiento: Ángel Fragoso Sánchez</p>
-                <p>Finalidad del tratamiento: Gestionar su solicitud de contacto y prestarle el servicio solicitado.</p>
-                <p>Legitimación: La ejecución de medidas precontractuales a su solicitud.</p>
-                <p>Destinatarios: No se cederán datos a terceros salvo obligación legal.</p>
-                <p>Derechos: Puede ejercer los derechos de acceso, rectificación, supresión, portabilidad y oposición/limitación del tratamiento de sus datos dirigiéndose a la dirección del responsable.</p>
-                <p>Para más información sobre el tratamiento de sus datos y los derechos que le amparan, puede acceder a nuestra <a href="politica-privacidad.php">Política de Privacidad</a>.</p>
-            </div>
+            <!-- Información de protección de datos: acordeón minimalista -->
+            <details class="protection-info">
+                <summary>Información sobre protección de datos</summary>
+                <div class="protection-info-body">
+                    <p>Sus datos serán tratados conforme al RGPD (UE) 2016/679 y la LOPDGDD 3/2018.</p>
+                    <ul>
+                        <li><strong>Responsable:</strong> Ángel Fragoso Sánchez</li>
+                        <li><strong>Finalidad:</strong> Gestionar su solicitud de contacto.</li>
+                        <li><strong>Legitimación:</strong> Medidas precontractuales a su solicitud.</li>
+                        <li><strong>Destinatarios:</strong> No se ceden datos a terceros salvo obligación legal.</li>
+                        <li><strong>Derechos:</strong> Acceso, rectificación, supresión, portabilidad y oposición.</li>
+                    </ul>
+                    <p>Más información en nuestra <a href="politica-privacidad.php">Política de Privacidad</a>.</p>
+                </div>
+            </details>
         </section>
     </main>
 

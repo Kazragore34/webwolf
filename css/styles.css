@@ -693,6 +693,59 @@ footer {
     background-color: #0d8bf2;
 }
 
+/* Sección protección de datos — acordeón minimalista */
+.protection-info {
+    margin-top: 3rem;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 1.5rem;
+}
+
+.protection-info summary {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #999;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+}
+.protection-info summary::-webkit-details-marker { display: none; }
+.protection-info summary::after {
+    content: '+';
+    font-size: 1rem;
+    color: #bbb;
+    transition: transform 0.25s;
+}
+.protection-info[open] summary::after {
+    transform: rotate(45deg);
+}
+.protection-info summary:hover { color: #555; }
+
+.protection-info-body {
+    margin-top: 1.2rem;
+    padding: 1.2rem 1.5rem;
+    background: #fafafa;
+    border-left: 2px solid #e0e0e0;
+    font-size: 0.85rem;
+    color: #777;
+    line-height: 1.7;
+}
+.protection-info-body ul {
+    margin: 0.8rem 0;
+    padding-left: 0;
+    list-style: none;
+}
+.protection-info-body ul li {
+    padding: 0.25rem 0;
+}
+.protection-info-body p { margin-bottom: 0.5rem; }
+.protection-info-body a { color: #555; }
+.protection-info-body a:hover { color: #000; }
+
 /* Estilos para páginas legales */
 .legal-page {
     padding: 4rem 5%;

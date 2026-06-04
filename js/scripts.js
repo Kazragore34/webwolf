@@ -56,16 +56,15 @@ window.addEventListener('load', createMasonryLayout);
 window.addEventListener('resize', createMasonryLayout);
 
 // Menú responsive
-const hamburger = document.querySelector('.hamburger');
+const menuToggle = document.querySelector('.menu-toggle');
 const navMenu = document.querySelector('.nav-menu');
 
-hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('active');
-    navMenu.classList.toggle('active');
-});
+if (menuToggle && navMenu) {
+    menuToggle.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
 
-// Cerrar menú al hacer clic en un enlace
-document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => {
-    hamburger.classList.remove('active');
-    navMenu.classList.remove('active');
-}));
+    document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+    }));
+}
