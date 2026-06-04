@@ -19,6 +19,22 @@ function leerJSON($p) { if (!file_exists($p)) return []; $d=json_decode(file_get
 function guardarJSON($p,$d) { file_put_contents($p,json_encode($d,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)); }
 function ytId($url) { preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/',$url,$m); return $m[1]??null; }
 
+// ── Contador de proformas ─────────────────────────
+function getNextNum() {
+    $file = 'proforma_counter.json';
+    $today = date('Ymd');
+    $d = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
+    $count = (isset($d['date']) && $d['date'] === $today) ? ($d['count'] + 1) : 1;
+    file_put_contents($file, json_encode(['date'=>$today,'count'=>$count]));
+    return 'WF-' . $today . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+}
+function revisionNum($n) {
+    // WF-xxx-001 → WF-xxx-001-R1 | WF-xxx-001-R1 → WF-xxx-001-R2
+    if (preg_match('/-R(\d+)$/', $n, $m))
+        return preg_replace('/-R\d+$/', '-R'.($m[1]+1), $n);
+    return $n.'-R1';
+}
+
 // ── Logo SVG ──────────────────────────────────────
 // Función que devuelve el SVG con un prefijo de ID único para evitar
 // duplicados cuando se incrusta varias veces en la misma página.
@@ -101,14 +117,56 @@ if (isset($_SESSION['admin_logged'])) {
         header('Location: admin.php?tab=videos'); exit;
     }
 
+    // PROFORMAS ────────────────────────────────────
+    if (!is_dir('proformas')) mkdir('proformas', 0755, true);
+
+    // Guardar proforma
+    if (isset($_POST['save_proforma'])) {
+        $pdata = json_decode($_POST['pf_json'] ?? '{}', true) ?: [];
+        $num = trim($pdata['num'] ?? getNextNum());
+        // Nombre de archivo seguro
+        $fname = 'proformas/' . preg_replace('/[^a-zA-Z0-9\-]/', '', $num) . '.json';
+        $pdata['saved_at'] = date('Y-m-d H:i:s');
+        $pdata['num'] = $num;
+        file_put_contents($fname, json_encode($pdata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $msg = "Proforma $num guardada."; $msg_tipo = 'ok';
+    }
+    // Eliminar proforma del historial
+    if (isset($_GET['del_pf'])) {
+        $fname = 'proformas/' . preg_replace('/[^a-zA-Z0-9\-]/', '', basename($_GET['del_pf'])) . '.json';
+        if (file_exists($fname)) unlink($fname);
+        header('Location: admin.php?tab=historial'); exit;
+    }
+
     // Datos para vista
     $imgs=[]; if(is_dir('imagenes/')) foreach(scandir('imagenes/')as $f) if(preg_match('/\.(jpg|jpeg|png|gif|webp)$/i',$f)) $imgs[]=$f;
     $alts = leerJSON('imagenes.json');
     $videos = leerJSON('videos.json');
+
+    // Historial de proformas (ordenado por fecha desc)
+    $historial = [];
+    if (is_dir('proformas')) {
+        foreach (scandir('proformas', SCANDIR_SORT_DESCENDING) as $f) {
+            if (substr($f,-5)==='.json') {
+                $d = json_decode(file_get_contents('proformas/'.$f), true);
+                if ($d) $historial[] = $d;
+            }
+        }
+    }
 }
 
 $tab = $_GET['tab'] ?? 'imagenes';
-$num_auto = 'WF-'.date('Ymd').'-001';
+// Número para la proforma actual: si viene ?edit=NUM usa ese + revisión, si no genera nuevo
+$num_auto = getNextNum();
+$pf_load = null; // datos a pre-cargar en el formulario
+if (isset($_GET['edit']) && isset($_SESSION['admin_logged'])) {
+    $efname = 'proformas/' . preg_replace('/[^a-zA-Z0-9\-]/', '', basename($_GET['edit'])) . '.json';
+    if (file_exists($efname)) {
+        $pf_load = json_decode(file_get_contents($efname), true);
+        $num_auto = revisionNum($pf_load['num'] ?? $num_auto);
+        $tab = 'proformas';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -238,73 +296,94 @@ body{font-family:'Segoe UI',sans-serif;background:#111;color:#eee;min-height:100
 ═══════════════════════════════════════ */
 .pf-prev{background:#777;overflow-y:auto;display:flex;justify-content:center;padding:1.5rem;}
 
-/* ─── Documento D1: blanco, watermark ─── */
-.doc{width:210mm;min-height:297mm;font-family:Arial,Helvetica,sans-serif;color:#111;box-shadow:0 4px 30px rgba(0,0,0,.5);}
+/* ─── Documento base ─── */
+.doc{width:210mm;height:297mm;font-family:Arial,Helvetica,sans-serif;color:#111;box-shadow:0 4px 30px rgba(0,0,0,.5);}
 
-/* Diseño 1 */
-.d1{background:#fff;padding:14mm 16mm;position:relative;overflow:hidden;}
-.wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);width:185mm;opacity:.07;pointer-events:none;z-index:0;}
+/* ── Diseño 1: blanco + watermark 45° ── */
+.d1{background:#fff;padding:18mm 20mm;position:relative;overflow:hidden;
+    display:flex;flex-direction:column;height:297mm;}
+/* Marca de agua: 45°, grande, cubre toda la diagonal */
+.wm{position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%) rotate(-45deg);
+    width:320mm;   /* más ancho que la diagonal del A4 */
+    opacity:.06;pointer-events:none;z-index:0;}
 .wm svg{width:100%;height:auto;}
 .d1>*:not(.wm){position:relative;z-index:1;}
-.d1-logo{display:flex;justify-content:center;margin-bottom:7mm;}
-.d1-logo .lw{width:60mm;}
+.d1-logo{display:flex;justify-content:center;margin-bottom:9mm;}
+.d1-logo .lw{width:65mm;}
 .d1-logo .lw svg{width:100%;height:auto;}
-.d1-tit{text-align:center;font-size:17pt;font-weight:900;text-transform:uppercase;letter-spacing:.03em;margin-bottom:7mm;}
-.d1-meta{display:flex;justify-content:space-between;margin-bottom:5mm;font-size:8pt;color:#444;}
-.d1-cli{background:#f5f5f5;border-left:3px solid #111;padding:3mm 4mm;margin-bottom:5mm;font-size:8.5pt;}
+.d1-tit{text-align:center;font-size:18pt;font-weight:900;text-transform:uppercase;
+    letter-spacing:.04em;margin-bottom:9mm;}
+.d1-meta{display:flex;justify-content:space-between;margin-bottom:7mm;
+    font-size:8.5pt;color:#444;padding-bottom:4mm;border-bottom:1px solid #eee;}
+.d1-cli{background:#f5f5f5;border-left:3px solid #111;padding:4mm 5mm;
+    margin-bottom:7mm;font-size:9pt;}
 .d1-cli strong{display:block;font-weight:800;margin-bottom:.5mm;}
-.d1-det{margin-bottom:6mm;}
-.d1-det p{font-size:9pt;margin-bottom:1.5mm;line-height:1.4;}
+.d1-det{margin-bottom:9mm;}
+.d1-det p{font-size:9.5pt;margin-bottom:2.5mm;line-height:1.5;}
 .d1-det strong{font-weight:700;}
-.d1-tbl{width:100%;border-collapse:collapse;margin-bottom:5mm;}
-.d1-tbl th{background:#111;color:#fff;padding:2.5mm 4mm;font-size:9pt;font-weight:700;text-align:left;}
-.d1-tbl th:last-child{text-align:right;width:28mm;}
-.d1-tbl td{padding:2mm 4mm;font-size:8.5pt;border-bottom:1px solid #ddd;}
+/* tabla ocupa espacio flexible */
+.d1-tbl-wrap{flex:1;display:flex;flex-direction:column;}
+.d1-tbl{width:100%;border-collapse:collapse;margin-bottom:7mm;}
+.d1-tbl th{background:#111;color:#fff;padding:3mm 5mm;font-size:9.5pt;font-weight:700;text-align:left;}
+.d1-tbl th:last-child{text-align:right;width:32mm;}
+.d1-tbl td{padding:3mm 5mm;font-size:9pt;border-bottom:1px solid #e8e8e8;}
 .d1-tbl td:last-child{text-align:right;font-weight:600;}
-.d1-tbl tr.sr td{background:#f5f5f5;font-weight:700;}
-.d1-tbl tr.ir td{font-size:7.5pt;color:#777;border-bottom:none;background:#f5f5f5;}
-.d1-tbl tr.tr td{background:#111;color:#fff;font-weight:900;font-size:10pt;border:none;}
-.d1-opts{margin-bottom:4mm;}
-.d1-opts strong{display:block;font-size:9.5pt;font-weight:800;margin-bottom:1.5mm;}
-.d1-opts p{font-size:8.5pt;line-height:1.7;white-space:pre-line;}
-.d1-notas{background:#f9f9f9;padding:3mm 4mm;margin-bottom:4mm;}
-.d1-notas strong{display:block;font-size:8pt;font-weight:700;margin-bottom:1mm;color:#555;}
-.d1-notas p{font-size:7.5pt;color:#666;line-height:1.5;white-space:pre-line;}
-.d1-val{text-align:center;font-size:7.5pt;color:#888;margin-bottom:5mm;}
-.d1-foot{border-top:1px solid #ddd;padding-top:3mm;display:flex;justify-content:space-between;font-size:7pt;color:#888;}
+.d1-tbl tr.sr td{background:#f5f5f5;font-weight:700;font-size:9.5pt;}
+.d1-tbl tr.ir td{font-size:8pt;color:#777;border-bottom:none;background:#f5f5f5;}
+.d1-tbl tr.tr td{background:#111;color:#fff;font-weight:900;font-size:11pt;border:none;padding:4mm 5mm;}
+.d1-opts{margin-bottom:7mm;}
+.d1-opts strong{display:block;font-size:10pt;font-weight:800;margin-bottom:2mm;}
+.d1-opts p{font-size:9pt;line-height:1.8;white-space:pre-line;}
+.d1-notas{background:#f9f9f9;padding:4mm 5mm;margin-bottom:7mm;}
+.d1-notas strong{display:block;font-size:8.5pt;font-weight:700;margin-bottom:1.5mm;color:#555;}
+.d1-notas p{font-size:8pt;color:#666;line-height:1.6;white-space:pre-line;}
+.d1-spacer{flex:1;} /* empuja footer al fondo */
+.d1-val{text-align:center;font-size:8pt;color:#888;margin-bottom:5mm;}
+.d1-foot{border-top:1px solid #ddd;padding-top:4mm;display:flex;
+    justify-content:space-between;font-size:7.5pt;color:#888;}
 
-/* Diseño 2 */
-.d2{background:#fff;padding:0 16mm 14mm;}
-.d2-head{background:#111;margin:0 -16mm 8mm;padding:8mm 16mm;display:flex;align-items:center;justify-content:space-between;}
-.d2-head .lw{width:55mm;}
+/* ── Diseño 2: header negro ── */
+.d2{background:#fff;height:297mm;display:flex;flex-direction:column;}
+.d2-head{background:#111;padding:10mm 20mm;display:flex;align-items:center;
+    justify-content:space-between;flex-shrink:0;}
+.d2-head .lw{width:60mm;}
 .d2-head .lw svg{width:100%;height:auto;filter:invert(1);}
 .d2-hr{text-align:right;}
-.d2-hr .num{font-size:7.5pt;color:#666;letter-spacing:.08em;text-transform:uppercase;}
-.d2-hr .tit{font-size:11pt;font-weight:800;color:#fff;margin-top:1mm;}
-.d2-hr .dt{font-size:7.5pt;color:#666;margin-top:.5mm;}
-.d2-cli{border:1px solid #eee;border-radius:2mm;padding:3.5mm 5mm;margin-bottom:5mm;font-size:9pt;}
+.d2-hr .num{font-size:8pt;color:#777;letter-spacing:.08em;text-transform:uppercase;}
+.d2-hr .tit{font-size:12pt;font-weight:800;color:#fff;margin-top:1.5mm;}
+.d2-hr .dt{font-size:8pt;color:#666;margin-top:1mm;}
+/* cuerpo del D2 con padding */
+.d2-body{padding:10mm 20mm;display:flex;flex-direction:column;flex:1;}
+.d2-cli{border:1px solid #eee;border-radius:2mm;padding:4mm 5mm;
+    margin-bottom:7mm;font-size:9.5pt;}
 .d2-cli strong{display:block;font-weight:800;margin-bottom:.5mm;}
-.d2-cli span{color:#888;font-size:8pt;}
-.d2-det{display:grid;grid-template-columns:1fr 1fr;gap:1.5mm;margin-bottom:6mm;}
-.d2-di{background:#f7f7f7;padding:2mm 3.5mm;border-radius:1.5mm;}
-.d2-di .lbl{font-size:6.5pt;text-transform:uppercase;letter-spacing:.08em;color:#aaa;margin-bottom:.3mm;}
-.d2-di .val{font-size:8pt;font-weight:600;}
-.d2-tbl{width:100%;border-collapse:collapse;margin-bottom:5mm;}
-.d2-tbl th{background:#111;color:#fff;padding:2.5mm 4mm;font-size:8.5pt;font-weight:700;text-align:left;}
-.d2-tbl th:last-child{text-align:right;width:28mm;}
-.d2-tbl td{padding:2mm 4mm;font-size:8.5pt;border-bottom:1px solid #f0f0f0;}
+.d2-cli span{color:#888;font-size:8.5pt;}
+.d2-det{display:grid;grid-template-columns:1fr 1fr;gap:2.5mm;margin-bottom:8mm;}
+.d2-di{background:#f7f7f7;padding:3mm 4mm;border-radius:1.5mm;}
+.d2-di .lbl{font-size:7pt;text-transform:uppercase;letter-spacing:.08em;
+    color:#aaa;margin-bottom:.5mm;}
+.d2-di .val{font-size:9pt;font-weight:600;}
+.d2-tbl{width:100%;border-collapse:collapse;margin-bottom:7mm;}
+.d2-tbl th{background:#111;color:#fff;padding:3mm 5mm;font-size:9pt;font-weight:700;text-align:left;}
+.d2-tbl th:last-child{text-align:right;width:32mm;}
+.d2-tbl td{padding:3mm 5mm;font-size:9pt;border-bottom:1px solid #f0f0f0;}
 .d2-tbl td:last-child{text-align:right;font-weight:600;}
 .d2-tbl tr.sr td{background:#f7f7f7;font-weight:700;}
-.d2-tbl tr.ir td{font-size:7.5pt;color:#aaa;border-bottom:none;}
-.d2-tbl tr.tr td{background:#111;color:#fff;font-weight:900;font-size:10.5pt;border:none;}
-.d2-opts{border-top:1px solid #eee;padding-top:4mm;margin-bottom:4mm;}
-.d2-opts strong{display:block;font-size:8pt;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#555;margin-bottom:1.5mm;}
-.d2-opts p{font-size:8pt;color:#777;line-height:1.7;white-space:pre-line;}
-.d2-notas{border:1px solid #eee;border-radius:2mm;padding:3mm 4mm;margin-bottom:4mm;}
-.d2-notas strong{display:block;font-size:7.5pt;font-weight:700;color:#aaa;text-transform:uppercase;margin-bottom:1mm;}
-.d2-notas p{font-size:7.5pt;color:#888;white-space:pre-line;line-height:1.5;}
-.d2-val{text-align:center;font-size:7.5pt;color:#bbb;margin:4mm 0;}
-.d2-foot{border-top:1px solid #eee;padding-top:3mm;display:flex;justify-content:space-between;font-size:7pt;color:#bbb;}
+.d2-tbl tr.ir td{font-size:8pt;color:#aaa;border-bottom:none;}
+.d2-tbl tr.tr td{background:#111;color:#fff;font-weight:900;font-size:11pt;border:none;padding:4mm 5mm;}
+.d2-opts{border-top:1px solid #eee;padding-top:5mm;margin-bottom:7mm;}
+.d2-opts strong{display:block;font-size:8.5pt;font-weight:800;text-transform:uppercase;
+    letter-spacing:.06em;color:#555;margin-bottom:2mm;}
+.d2-opts p{font-size:9pt;color:#777;line-height:1.8;white-space:pre-line;}
+.d2-notas{border:1px solid #eee;border-radius:2mm;padding:4mm 5mm;margin-bottom:7mm;}
+.d2-notas strong{display:block;font-size:8pt;font-weight:700;color:#aaa;
+    text-transform:uppercase;margin-bottom:1.5mm;}
+.d2-notas p{font-size:8pt;color:#888;white-space:pre-line;line-height:1.5;}
+.d2-spacer{flex:1;}
+.d2-val{text-align:center;font-size:8pt;color:#bbb;margin-bottom:4mm;}
+.d2-foot{border-top:1px solid #eee;padding-top:4mm;display:flex;
+    justify-content:space-between;font-size:7.5pt;color:#bbb;}
 
 /* ── Print ── */
 @media print{
@@ -359,6 +438,9 @@ body{font-family:'Segoe UI',sans-serif;background:#111;color:#eee;min-height:100
             </button>
             <button class="nav-item <?= $tab==='proformas'?'active':'' ?>" onclick="goTab('proformas')">
                 <span class="ico">📄</span> Proformas
+            </button>
+            <button class="nav-item <?= $tab==='historial'?'active':'' ?>" onclick="goTab('historial')" style="padding-left:2rem;">
+                <span class="ico">🗂</span> Historial
             </button>
         </nav>
         <div class="sidebar-foot">wolffilms.es</div>
@@ -524,8 +606,17 @@ Entrega exprés en 48h +50 €</textarea></div>
             <h3>Notas adicionales</h3>
             <div class="fld"><textarea id="fnot" placeholder="Condiciones de pago, etc."></textarea></div>
 
-            <button class="pf-print" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
-            <p class="pf-hint">En el diálogo → «Guardar como PDF»</p>
+            <div style="display:flex;gap:.5rem;margin-top:1rem;">
+                <button class="pf-print" style="flex:1" onclick="window.print()">🖨 Imprimir / PDF</button>
+                <button class="pf-print" style="flex:1;background:#2ecc71;color:#fff;" onclick="guardarPF()">💾 Guardar</button>
+            </div>
+            <p class="pf-hint">Guardar añade al historial · Imprimir abre el diálogo PDF</p>
+
+            <!-- Form oculto para guardar -->
+            <form id="save-form" method="POST" style="display:none">
+                <input type="hidden" name="save_proforma" value="1">
+                <input type="hidden" name="pf_json" id="pf-json-input">
+            </form>
         </div>
 
         <!-- Preview -->
@@ -551,11 +642,12 @@ Entrega exprés en 48h +50 €</textarea></div>
                     <tbody id="p1tb"></tbody><tfoot id="p1tf"></tfoot></table>
                 <div class="d1-opts" id="p1ob" style="display:none"><strong>Opcionales:</strong><p id="p1op"></p></div>
                 <div class="d1-notas" id="p1nb" style="display:none"><strong>Notas</strong><p id="p1no"></p></div>
+                <div class="d1-spacer"></div>
                 <div class="d1-val" id="p1va">Presupuesto válido durante 30 días</div>
                 <div class="d1-foot"><span>WolfFilms — Ángel Fragoso Sánchez</span><span>angelsanchez@wolffilms.es · +34 628 55 82 25</span><span>wolffilms.es</span></div>
             </div>
 
-            <!-- D2: oscuro -->
+            <!-- D2: header negro + body padding -->
             <div class="doc d2" id="doc2" style="display:none">
                 <div class="d2-head">
                     <div class="lw"><?= logo_svg() ?></div>
@@ -565,33 +657,82 @@ Entrega exprés en 48h +50 €</textarea></div>
                         <div class="dt" id="p2f"><?=date('d/m/Y')?></div>
                     </div>
                 </div>
-                <div class="d2-cli" id="p2cli" style="display:none"><strong id="p2cn"></strong><span id="p2cc"></span></div>
-                <div class="d2-det">
-                    <div class="d2-di"><div class="lbl">Duración</div><div class="val" id="p2du">4-5 horas</div></div>
-                    <div class="d2-di"><div class="lbl">Tipo</div><div class="val" id="p2ti">Retrato cosmético</div></div>
-                    <div class="d2-di"><div class="lbl">Ubicación</div><div class="val" id="p2ub">Espacio del cliente</div></div>
-                    <div class="d2-di"><div class="lbl">Entrega</div><div class="val" id="p2en">20-30 fotografías</div></div>
+                <div class="d2-body">
+                    <div class="d2-cli" id="p2cli" style="display:none"><strong id="p2cn"></strong><span id="p2cc"></span></div>
+                    <div class="d2-det">
+                        <div class="d2-di"><div class="lbl">Duración</div><div class="val" id="p2du">4-5 horas</div></div>
+                        <div class="d2-di"><div class="lbl">Tipo</div><div class="val" id="p2ti">Retrato cosmético</div></div>
+                        <div class="d2-di"><div class="lbl">Ubicación</div><div class="val" id="p2ub">Espacio del cliente</div></div>
+                        <div class="d2-di"><div class="lbl">Entrega</div><div class="val" id="p2en">20-30 fotografías</div></div>
+                    </div>
+                    <table class="d2-tbl"><thead><tr><th>Concepto</th><th>Precio (€)</th></tr></thead>
+                        <tbody id="p2tb"></tbody><tfoot id="p2tf"></tfoot></table>
+                    <div class="d2-opts" id="p2ob" style="display:none"><strong>Opcionales</strong><p id="p2op"></p></div>
+                    <div class="d2-notas" id="p2nb" style="display:none"><strong>Notas</strong><p id="p2no"></p></div>
+                    <div class="d2-spacer"></div>
+                    <div class="d2-val" id="p2va">Presupuesto válido durante 30 días</div>
+                    <div class="d2-foot"><span>WolfFilms — Ángel Fragoso Sánchez</span><span>angelsanchez@wolffilms.es · +34 628 55 82 25</span><span>wolffilms.es</span></div>
                 </div>
-                <table class="d2-tbl"><thead><tr><th>Concepto</th><th>Precio (€)</th></tr></thead>
-                    <tbody id="p2tb"></tbody><tfoot id="p2tf"></tfoot></table>
-                <div class="d2-opts" id="p2ob" style="display:none"><strong>Opcionales</strong><p id="p2op"></p></div>
-                <div class="d2-notas" id="p2nb" style="display:none"><strong>Notas</strong><p id="p2no"></p></div>
-                <div class="d2-val" id="p2va">Presupuesto válido durante 30 días</div>
-                <div class="d2-foot"><span>WolfFilms — Ángel Fragoso Sánchez</span><span>angelsanchez@wolffilms.es · +34 628 55 82 25</span><span>wolffilms.es</span></div>
             </div>
 
         </div><!-- /pf-prev -->
     </div><!-- /pf-shell -->
+
+    <!-- ══════════════ HISTORIAL ══════════════ -->
+    <div class="panel <?= $tab==='historial'?'active':'' ?>" id="tab-historial" style="<?= $tab==='historial'?'display:block':'display:none' ?>">
+        <div class="section-lbl">Historial de proformas <span style="background:#1e1e1e;color:#777;border-radius:20px;padding:.1rem .5rem;font-size:.68rem;margin-left:.3rem;"><?=count($historial??[])?></span></div>
+
+        <?php if(empty($historial)): ?>
+            <p style="color:#444;text-align:center;padding:3rem">No hay proformas guardadas aún.<br>
+            <span style="font-size:.8rem">Crea una en el apartado «Proformas» y pulsa 💾 Guardar.</span></p>
+        <?php else: ?>
+        <table style="width:100%;border-collapse:collapse;">
+            <thead>
+                <tr style="border-bottom:1px solid #1e1e1e;">
+                    <th style="text-align:left;padding:.6rem .8rem;font-size:.72rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.07em;">Número</th>
+                    <th style="text-align:left;padding:.6rem .8rem;font-size:.72rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.07em;">Cliente</th>
+                    <th style="text-align:left;padding:.6rem .8rem;font-size:.72rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.07em;">Título</th>
+                    <th style="text-align:left;padding:.6rem .8rem;font-size:.72rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.07em;">Guardado</th>
+                    <th style="padding:.6rem .8rem;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($historial as $h): ?>
+                <?php $num=htmlspecialchars($h['num']??'—'); $esRev=str_contains($h['num']??'','-R'); ?>
+                <tr style="border-bottom:1px solid #161616;" onmouseover="this.style.background='#161616'" onmouseout="this.style.background=''">
+                    <td style="padding:.65rem .8rem;font-size:.85rem;font-family:monospace;">
+                        <?=$num?>
+                        <?php if($esRev):?><span style="background:#f39c12;color:#000;border-radius:3px;padding:.1rem .35rem;font-size:.65rem;font-weight:700;margin-left:.3rem">REV</span><?php endif;?>
+                    </td>
+                    <td style="padding:.65rem .8rem;font-size:.85rem;color:#aaa;"><?=htmlspecialchars($h['cliente_nombre']??'—')?></td>
+                    <td style="padding:.65rem .8rem;font-size:.82rem;color:#666;"><?=htmlspecialchars($h['titulo']??'—')?></td>
+                    <td style="padding:.65rem .8rem;font-size:.78rem;color:#555;"><?=htmlspecialchars(substr($h['saved_at']??'',0,10))?></td>
+                    <td style="padding:.65rem .8rem;display:flex;gap:.4rem;justify-content:flex-end;">
+                        <a href="?tab=proformas&edit=<?=urlencode($h['num']??'')?>"
+                           class="btn btn-white" style="font-size:.75rem;padding:.35rem .7rem;">✏️ Editar</a>
+                        <a href="?del_pf=<?=urlencode($h['num']??'')?>&tab=historial"
+                           class="btn btn-red" style="font-size:.75rem;padding:.35rem .7rem;"
+                           onclick="return confirm('¿Eliminar <?=$num?>?')">✕</a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php endif; ?>
+    </div>
 
 </div><!-- /shell -->
 
 <script>
 // ── Navegación tabs ───────────────────────────────
 function goTab(t) {
-    ['imagenes','videos'].forEach(n=>{
-        document.getElementById('tab-'+n).classList.toggle('active', n===t);
+    ['imagenes','videos','historial'].forEach(n=>{
+        const el=document.getElementById('tab-'+n);
+        if(el) el.classList.toggle('active', n===t);
+        if(el) el.style.display = (n===t) ? 'block' : 'none';
     });
-    document.getElementById('tab-proformas').classList.toggle('active', t==='proformas');
+    const pf=document.getElementById('tab-proformas');
+    if(pf){ pf.classList.toggle('active', t==='proformas'); }
     document.querySelectorAll('.nav-item').forEach(b=>{
         b.classList.toggle('active', b.getAttribute('onclick')?.includes("'"+t+"'"));
     });
@@ -639,6 +780,65 @@ function setD(n,btn){
     document.getElementById('doc2').style.display=n===2?'':'none';
     document.getElementById('pfp').dataset.design=n;
 }
+
+// ── Guardar proforma ──────────────────────────────
+function guardarPF(){
+    const rows=[];
+    document.querySelectorAll('.rg').forEach(r=>{
+        const ins=r.querySelectorAll('input');
+        const c=ins[0].value.trim(), p=ins[1].value.trim();
+        if(c) rows.push({c,p});
+    });
+    const data={
+        num: val('fn'),
+        titulo: val('ft'),
+        fecha: val('ff'),
+        validez: val('fv'),
+        cliente_nombre: val('fcn'),
+        cliente_email: val('fce'),
+        cliente_tel: val('fct'),
+        duracion: val('fdu'),
+        ubicacion: val('fub'),
+        tipo: val('fti'),
+        entrega: val('fen'),
+        iva: val('fiva'),
+        opts: val('fopts'),
+        notas: val('fnot'),
+        design: activeD,
+        rows: rows
+    };
+    document.getElementById('pf-json-input').value = JSON.stringify(data);
+    document.getElementById('save-form').submit();
+}
+
+// ── Cargar proforma desde historial ──────────────
+<?php if($pf_load): ?>
+window.addEventListener('DOMContentLoaded', function(){
+    const d = <?= json_encode($pf_load) ?>;
+    const sv = id => { const el=document.getElementById(id); if(el) el.value=d[id]||''; };
+    document.getElementById('fn').value = <?= json_encode($num_auto) ?>;
+    ['ft','ff','fv','fcn','fce','fct','fdu','fub','fti','fen','fiva','fopts','fnot']
+        .forEach(k=>{ const el=document.getElementById(k); if(el&&d[k.replace('f','')]){}});
+    // mapeo de campos
+    const map={ft:'titulo',ff:'fecha',fv:'validez',fcn:'cliente_nombre',fce:'cliente_email',
+               fct:'cliente_tel',fdu:'duracion',fub:'ubicacion',fti:'tipo',fen:'entrega',
+               fiva:'iva',fopts:'opts',fnot:'notas'};
+    Object.entries(map).forEach(([eid,key])=>{
+        const el=document.getElementById(eid);
+        if(el && d[key]!==undefined) el.value=d[key];
+    });
+    // Filas
+    if(d.rows && d.rows.length){
+        document.getElementById('rl').innerHTML='';
+        d.rows.forEach(r=>addR(r.c,r.p));
+    }
+    // Diseño
+    if(d.design===2){
+        const btn=document.querySelectorAll('.ds-btn')[1]; if(btn)setD(2,btn);
+    }
+    upd();
+});
+<?php endif; ?>
 
 function upd(){
     const fd=val('ff'); const fmtD=fd?fd.split('-').reverse().join('/') : '';
