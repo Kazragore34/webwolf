@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aviso Legal - WolfFilms</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="https://wolffilms.es/">
     <link rel="stylesheet" href="css/styles.css">
     <!-- Iconos de Lucide -->
     <script src="https://unpkg.com/lucide@latest"></script>

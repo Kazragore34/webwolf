@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WolfFilms — Fotografía y Vídeo Profesional Madrid | Ángel Sánchez</title>
-    <meta name="description" content="Fotógrafo y videógrafo profesional en Madrid. Bodas, eventos, retratos y fotografía artística. Disponible en toda Europa. Contacta con WolfFilms.">
-    <meta name="keywords" content="fotógrafo Madrid, videógrafo Madrid, fotografía profesional, portfolio fotografía, WolfFilms, Ángel Sánchez fotógrafo">
+    <meta name="description" content="Fotógrafo y videógrafo profesional en Aranjuez y Madrid. Bodas, eventos corporativos, retratos y fotografía artística. Disponible para toda España y Europa. WolfFilms — Ángel Sánchez.">
+    <meta name="keywords" content="fotógrafo Aranjuez, videógrafo Aranjuez, fotógrafo Madrid, fotografía profesional Aranjuez, bodas Aranjuez, WolfFilms, Ángel Sánchez fotógrafo">
     <meta name="author" content="Ángel Fragoso Sánchez — WolfFilms">
     <link rel="canonical" href="https://wolffilms.es/">
 
     <!-- Open Graph / redes sociales -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://wolffilms.es/">
-    <meta property="og:title" content="WolfFilms — Fotografía y Vídeo Profesional Madrid">
+    <meta property="og:title" content="WolfFilms — Fotógrafo Profesional Aranjuez y Madrid">
     <meta property="og:description" content="Fotógrafo y videógrafo profesional en Madrid. Bodas, eventos, retratos y fotografía artística. Disponible en toda Europa.">
     <meta property="og:image" content="https://wolffilms.es/portada.jpg">
     <meta property="og:locale" content="es_ES">
@@ -29,7 +29,7 @@
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": "WolfFilms",
-      "description": "Fotografía y vídeo profesional en Madrid",
+      "description": "Fotógrafo y videógrafo profesional en Aranjuez y Madrid. Bodas, eventos, retratos y fotografía artística. Disponible para toda España y Europa.",
       "url": "https://wolffilms.es",
       "telephone": "+34628558225",
       "email": "angelsanchez@wolffilms.es",
@@ -37,9 +37,11 @@
       "logo": "https://wolffilms.es/logowolf.png",
       "address": {
         "@type": "PostalAddress",
-        "addressLocality": "Madrid",
+        "addressLocality": "Aranjuez",
+        "addressRegion": "Madrid",
         "addressCountry": "ES"
       },
+      "areaServed": ["Aranjuez", "Madrid", "España", "Europa"],
       "sameAs": [
         "https://www.instagram.com/wolfsanchez_/"
       ],
