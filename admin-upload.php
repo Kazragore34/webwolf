@@ -277,6 +277,7 @@ if (isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true) {
     <div class="tabs">
         <div class="tab active" onclick="showTab('imagenes')">📷 Imágenes</div>
         <div class="tab" onclick="showTab('videos')">🎬 Vídeos (Reel)</div>
+        <a href="admin-proforma.php" class="tab" style="text-decoration:none">📄 Proformas</a>
     </div>
 
     <!-- ════════════ TAB: IMÁGENES ════════════ -->
